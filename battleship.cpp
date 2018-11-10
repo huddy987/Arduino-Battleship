@@ -29,8 +29,24 @@ Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
 // Define TouchScreen
 TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
 
-//The grid boxes are 40x40 pixels
+// Define grid box size (40x40)
 #define BOXSIZE 40
+
+void draw_empty_grid(){
+  tft.fillScreen(ILI9341_BLACK);
+
+  // Draws a 6 x 7 grid of 40x40 pixel boxes
+  // Starts at index 0 because 40*0=0
+  for (int i = 1; i < 8; i++){
+    for (int j = 1; j < 7; j++){
+      tft.drawRect((tft.width() - BOXSIZE * j), (tft.height() - BOXSIZE * i), BOXSIZE, BOXSIZE, ILI9341_WHITE);
+    }
+  }
+  // Draw a placeholder for the menu
+  // TODO: Replace this with something meaningful/useful
+  tft.fillRect(0, 0, 120, BOXSIZE, ILI9341_RED);
+  tft.fillRect(120, 0, 120, BOXSIZE, ILI9341_GREEN);
+}
 
 void setup() {
   init();
@@ -39,18 +55,7 @@ void setup() {
 
   tft.begin();
   // Fill the screen with black (for background)
-  tft.fillScreen(ILI9341_BLACK);
-
-  // Draws a 6 x 7 grid of 40x40 pixel boxes
-  for (int i = 1; i < 8; i++){
-    for (int j = 1; j < 7; j++){
-      tft.drawRect((tft.width() - BOXSIZE * j), (tft.height() - BOXSIZE * i), BOXSIZE, BOXSIZE, ILI9341_WHITE);
-    }
-  }
-  // Draw a placeholder for the menu
-  // TODO: Replace this with something meaningful/useful
-  tft.fillRect(0, 0, 120, BOXSIZE, ILI9341_GREEN);
-  tft.fillRect(120, 0, 120, BOXSIZE, ILI9341_RED);
+  draw_empty_grid();
 }
 
 int main(){
@@ -84,7 +89,39 @@ void loop(){
   Serial.println(p.x);
   Serial.println(p.y);
 
-  // Placeholder for testing touch screen accuracy
-  tft.fillCircle(p.x, p.y, 1, ILI9341_ORANGE);
+  // If we are inside the menu region...
+  if (p.y < 40){
+    // If we are in the top half of the menu...
+    if (p.x > 120){
+      draw_empty_grid();
+    }
+    // If we are in the bottom half of the menu...
+    else if (p.x < 120) {
+      tft.fillRect(0, 0, 120, BOXSIZE, ILI9341_GREEN);
+      delay(500);
+      tft.fillRect(0, 0, 120, BOXSIZE, ILI9341_RED);
+    }
+  }
 
+  // If we are inside the grid reion...
+  else if (p.y > 40){
+    // Start at the largest box size
+    for (int i = 8; i > -1; i--){
+      // If the y coordinate is greater then the multiple of the box, we know it is inside the box at that index.
+      if (p.y >= (BOXSIZE * i)){
+        // Start at the largest box size
+        for (int j = 7; j > -1; j--){
+          // If the x coordinate is greater then the multiple of the box, we know it is inside the box at that index.
+          if (p.x >= (BOXSIZE * j)){
+            // Draw a red box inside the correct box
+            tft.fillRect((BOXSIZE * j), (BOXSIZE * i), BOXSIZE, BOXSIZE, ILI9341_RED);
+            // Break here so we don't continually draw boxes in the x direction
+            break;
+          }
+        }
+        // Break here so we don't continually draw boxes in the y direction
+        break;
+      }
+    }
+  }
 }
