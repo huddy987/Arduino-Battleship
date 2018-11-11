@@ -2,6 +2,8 @@
 #include <SPI.h>             // Library for SPI mode
 #include <Adafruit_ILI9341.h> // Controller chip library
 #include "TouchScreen.h"    //Library for TouchScreen
+#include "touch_handler.h"  // touch handler header file
+#include "draw_handler.h" // draw handler header file
 
 
 // These are the four touchscreen analog pins
@@ -29,7 +31,7 @@ Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
 // Define TouchScreen
 TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
 
-//The grid boxes are 40x40 pixels
+// Define grid box size (40x40)
 #define BOXSIZE 40
 
 void setup() {
@@ -39,22 +41,16 @@ void setup() {
 
   tft.begin();
   // Fill the screen with black (for background)
-  tft.fillScreen(ILI9341_BLACK);
-
-  // Draws a 6 x 7 grid of 40x40 pixel boxes
-  for (int i = 1; i < 8; i++){
-    for (int j = 1; j < 7; j++){
-      tft.drawRect((tft.width() - BOXSIZE * j), (tft.height() - BOXSIZE * i), BOXSIZE, BOXSIZE, ILI9341_WHITE);
-    }
-  }
-  // Draw a placeholder for the menu
-  // TODO: Replace this with something meaningful/useful
-  tft.fillRect(0, 0, 120, BOXSIZE, ILI9341_GREEN);
-  tft.fillRect(120, 0, 120, BOXSIZE, ILI9341_RED);
+  draw_empty_grid(tft, BOXSIZE);
+  // Placeholder menu TODO replace
+  tft.fillRect(0, 0, 120, BOXSIZE, ILI9341_RED);
+  tft.fillRect(120, 0, 120, BOXSIZE, ILI9341_GREEN);
 }
 
 int main(){
   setup();
+  // Check this out! Draws a pink rectangle at given coordinates TODO: remove this
+  draw_at_grid_pos(tft, BOXSIZE, "D3", ILI9341_PINK);
   while (1){
     loop();
   }
@@ -76,15 +72,41 @@ void loop(){
 
   // Scale from 0->1000 to tft.width and tft.height using the calibration #'s
 
-  //WARNING: Oddly enough, there is a deadzone at the top of the display if we don't add the +10. - Hudson
   p.x = map(p.x, TS_MINX, TS_MAXX, 0, tft.width() + 10);
   p.y = map(p.y, TS_MINY, TS_MAXY, 0, tft.height());
 
-  // TODO: Round these values to the center of each grid box and check if touch is inside a menu button.
+  /*
   Serial.println(p.x);
   Serial.println(p.y);
+  */
 
-  // Placeholder for testing touch screen accuracy
-  tft.fillCircle(p.x, p.y, 1, ILI9341_ORANGE);
+  // If we are inside the menu region...
+  if (p.y < 40){
+    // If we are in the top half of the menu...
+    if (p.x > 120){
+      // Draw empty grid
+      draw_empty_grid(tft, BOXSIZE);
+      // Placeholder menu TODO replace
+      tft.fillRect(0, 0, 120, BOXSIZE, ILI9341_RED);
+      tft.fillRect(120, 0, 120, BOXSIZE, ILI9341_GREEN);
+    }
+    // If we are in the bottom half of the menu...
+    else if (p.x < 120) {
+      tft.fillRect(0, 0, 120, BOXSIZE, ILI9341_GREEN);
+      delay(500);
+      tft.fillRect(0, 0, 120, BOXSIZE, ILI9341_RED);
+    }
+  }
 
+  // If we are inside the grid region get the grid position
+  else if (p.y > 40){
+    String grid_pos = get_grid_position(p, BOXSIZE);
+    draw_at_grid_pos(tft, BOXSIZE, grid_pos, ILI9341_NAVY);
+    Serial.print(grid_pos);
+    delay(500);
+    /*
+      Since this is a string, it will be very easy for decomposition:
+      grid_pos[0] returns the A-G value, grid_pos[1] returns the 0-5 value
+    */
+}
 }

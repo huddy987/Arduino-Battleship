@@ -4,6 +4,11 @@ https://learn.adafruit.com/adafruit-2-4-color-tft-touchscreen-breakout/spi-wirin
 
 https://learn.adafruit.com/adafruit-gfx-graphics-library/graphics-primitives
 
+ACKNOWLEDGEMENTS:
+The set up of the touchscreen display was inspired by code from the adafruit tutorials that showed how to set up and
+calibrate the screen. Code was written using adafruit libraries alongside the arduino library. Other than that,
+all code was written from scratch by us.
+
 
 WIRING:
 
@@ -19,6 +24,24 @@ PIN A11<--> DISPLAY X-
 PIN A10<--> DISPLAY Y+
 PIN 6<--> DISPLAY Y-
 
-ISSUES THAT NEED IMMEDIATE ATTENTION:
+SCREEN DIAGRAM FOR REFERENCE (VARIABLES FOLLOW THIS GRID):
 
-why do we need to add +10 to the width to be able to touch in the top of the display? The might be an issue we just fix and ignore the reason why, the addafruit example as the same issue.
+Ex: A5 is the top left corner of the grid.
+
+
+        (ARDUINO BREADBOARD IS UP HERE)
+
+              A   B   C   D   E   F   G
+      -----------------------------------
+      |  M  |   |   |   |   |   |   |   | 5
+      |     |---------------------------|
+      |  E  |   |   |   |   |   |   |   | 4
+      |     |---------------------------|
+      |  N  |   |   |   |   |   |   |   | 3
+      |     |---------------------------|
+      |  U  |   |   |   |   |   |   |   | 2
+      |     |---------------------------|
+      |  "  |   |   |   |   |   |   |   | 1
+      |     |---------------------------|
+      |  "  |   |   |   |   |   |   |   | 0
+      -----------------------------------
