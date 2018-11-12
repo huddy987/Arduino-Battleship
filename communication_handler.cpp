@@ -7,23 +7,12 @@
 //NOTE: remember to initialize Serial3 in the setup similar to diffie
 
 /* TODO:
-  0. each arduino will have an array from A5 to G0
-    >>> element 0 is block A5, el. 1 i B5... element 41 is block G0
-      to keep track of which blocks have been selected
-      keep this array in the stack of the main file in order
-      make it permanent
-  1. make both arduinos store the blocks entered in both arduinos
-    a. this will be done in the form of an array.
-    b. a block can have 6 states.
-      0 = undisturbed
-      1 = has a boat hidden; not shot
-      2 = has a boat that's been shot
-      3 = has been shot but no boat
-      4 = enemy's: shot but no boat
-      5 = enemy's: shot but yes boat
-    c. the array element will store a number
-      corresponding to the state of a block
-*/
+  1. P1 will send the block selected
+  2. P2 will recieve the block and update their game array
+  3. send to P1 if hit or miss
+    a. special case if all points of the ship has been hit
+  4. P1 will update their game state accordingly.
+  5. P2's turn.
 
 
 }
