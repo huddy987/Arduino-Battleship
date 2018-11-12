@@ -3,6 +3,21 @@
 #include <Adafruit_ILI9341.h> // Controller chip library
 #include "TouchScreen.h"    //Library for TouchScreen
 
+// Draw menu for player selection
+
+void draw_menu(Adafruit_ILI9341 display){
+  int char_size = 10;
+  // Need to do this to rotate text
+  display.setRotation(1);
+
+  display.fillRect((display.width() / 2), 0, (display.width() / 2), display.height(), ILI9341_BLUE);
+  display.fillRect(0, 0, (display.width() / 2), display.height(), ILI9341_PINK);
+
+  // Characters are (5,7) * char_size
+  // Using this expression, we can center characters
+  display.drawChar(((display.width() / 4) - (char_size * (5 / 2))), ((display.height() / 2) - (char_size * (7 / 2))), '1', ILI9341_WHITE, ILI9341_PINK, char_size);
+  display.drawChar((((3 * display.width()) / 4) - (char_size * (5 / 2))), ((display.height() / 2)- (char_size * (7 / 2))), '2', ILI9341_WHITE, ILI9341_BLUE, char_size);
+}
 
 // Draws an empty grid
 void draw_empty_grid(Adafruit_ILI9341 display, int BOXSIZE){

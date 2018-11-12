@@ -84,11 +84,8 @@ void loop(){
   if (p.y < 40){
     // If we are in the top half of the menu...
     if (p.x > 120){
-      // Draw empty grid
-      draw_empty_grid(tft, BOXSIZE);
-      // Placeholder menu TODO replace
-      tft.fillRect(0, 0, 120, BOXSIZE, ILI9341_RED);
-      tft.fillRect(120, 0, 120, BOXSIZE, ILI9341_GREEN);
+      // Draw menu
+      draw_menu(tft);
     }
     // If we are in the bottom half of the menu...
     else if (p.x < 120) {
