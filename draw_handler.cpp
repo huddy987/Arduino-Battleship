@@ -3,8 +3,27 @@
 #include <Adafruit_ILI9341.h> // Controller chip library
 #include "TouchScreen.h"    //Library for TouchScreen
 
-// Draw menu for player selection
+// Draws win if you won, lose if you lost (0 is lose, 1 is win)
+void draw_outcome(Adafruit_ILI9341 display, int win_status){
+  // Need to do this to rotate text
+  display.setRotation(1);
+  display.setTextColor(ILI9341_WHITE);
+  display.setTextSize(10);
 
+  // Have to make cursor x different for each one because of the size of the characters
+  if ( win_status == 0 ){
+    display.setCursor(45, 85);
+    display.fillScreen(ILI9341_RED);
+    display.print("Lose");
+  }
+  else if ( win_status == 1){
+    display.setCursor(50, 85);
+    display.fillScreen(ILI9341_GREEN);
+    display.print("Win!");
+  }
+}
+
+// Draw menu for # of players selection
 void draw_menu(Adafruit_ILI9341 display){
   int char_size = 10;
   // Need to do this to rotate text
@@ -21,6 +40,9 @@ void draw_menu(Adafruit_ILI9341 display){
 
 // Draws an empty grid
 void draw_empty_grid(Adafruit_ILI9341 display, int BOXSIZE){
+  // Need to do this to rotate to standard game rotations as specified in readme (after main menu).
+  display.setRotation(0);
+  
   display.fillScreen(ILI9341_BLACK);
 
   // Draws a 6 x 7 grid of 40x40 pixel boxes

@@ -1,6 +1,8 @@
 Specific TODOs:
 - Grid class (grid.draw_empty_grid, other functions relying on the display and the grid)
 - Game class (if game.phase = 0 setup, if game.phase = 1 in game, etc.)
+- confirm button class?
+- cancel button class?
 
 
 RESOURCES:
