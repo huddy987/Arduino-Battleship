@@ -41,9 +41,11 @@ uint16_t determine_array_element(String grid_pos){
   }
 
 // the input of this function will be the array, the block number
-void update_game_array(int player_array[], uint16_t block_number){
+void update_game_array(uint16_t player_array[][2], uint16_t block_number){
   /*
-  (*(player_array + block_number))[0] == the boat ID
-  (*(player_array + block_number))[0] == the block state */
-  if
+  *(*(player_array + block_number)) == the boat ID
+  *(*(player_array + block_number) + 1) == the block state */
+  // *(*(arramina + 3)+1); 4th row, 2nd column
+  if *(*(player_array + block_number))
+
 }
