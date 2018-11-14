@@ -1,7 +1,10 @@
 #ifndef _DRAW_HANDLER_H_
 #define _DRAW_HANDLER_H_
 
-// header file for touch handler
+
+void draw_outcome(Adafruit_ILI9341 display, int win_status);
+
+void draw_menu(Adafruit_ILI9341);
 
 void draw_empty_grid(Adafruit_ILI9341 display, int BOXSIZE);
 

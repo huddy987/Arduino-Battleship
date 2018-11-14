@@ -5,6 +5,21 @@
 #include <Adafruit_ILI9341.h> // Controller chip library
 #include "TouchScreen.h"    //Library for TouchScreen
 #include "touch_handler.h"  //touch handler header file
+#include "draw_handler.h" // Draw handler header file
+
+// Check how many players are selected and go to appropriate game mode
+void get_game_mode(Adafruit_ILI9341 display, TSPoint point){
+  if (point.x > 120){
+    //TODO: Single player
+    Serial.print("1 player mode selected.");
+    draw_empty_grid(display, 40);
+  }
+  else if (point.x < 120){
+    //TODO: 2 players
+    Serial.print("2 players mode selected.");
+    draw_empty_grid(display, 40);
+  }
+}
 
 // Returns the grid position in the for [LETTER][NUMBER] as a string
 

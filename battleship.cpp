@@ -40,17 +40,12 @@ void setup() {
   Serial.println("Welcome to Battleship!");
 
   tft.begin();
-  // Fill the screen with black (for background)
-  draw_empty_grid(tft, BOXSIZE);
-  // Placeholder menu TODO replace
-  tft.fillRect(0, 0, 120, BOXSIZE, ILI9341_RED);
-  tft.fillRect(120, 0, 120, BOXSIZE, ILI9341_GREEN);
+  // draw menu
+  draw_menu(tft);
 }
 
 int main(){
   setup();
-  // Check this out! Draws a pink rectangle at given coordinates TODO: remove this
-  draw_at_grid_pos(tft, BOXSIZE, "D3", ILI9341_PINK);
   while (1){
     loop();
   }
@@ -75,20 +70,17 @@ void loop(){
   p.x = map(p.x, TS_MINX, TS_MAXX, 0, tft.width() + 10);
   p.y = map(p.y, TS_MINY, TS_MAXY, 0, tft.height());
 
+  get_game_mode(tft, p);
+
   /*
   Serial.println(p.x);
   Serial.println(p.y);
-  */
-
   // If we are inside the menu region...
   if (p.y < 40){
     // If we are in the top half of the menu...
     if (p.x > 120){
-      // Draw empty grid
-      draw_empty_grid(tft, BOXSIZE);
-      // Placeholder menu TODO replace
-      tft.fillRect(0, 0, 120, BOXSIZE, ILI9341_RED);
-      tft.fillRect(120, 0, 120, BOXSIZE, ILI9341_GREEN);
+      // Draw menu
+      draw_menu(tft);
     }
     // If we are in the bottom half of the menu...
     else if (p.x < 120) {
@@ -104,9 +96,8 @@ void loop(){
     draw_at_grid_pos(tft, BOXSIZE, grid_pos, ILI9341_NAVY);
     Serial.print(grid_pos);
     delay(500);
-    /*
+
       Since this is a string, it will be very easy for decomposition:
       grid_pos[0] returns the A-G value, grid_pos[1] returns the 0-5 value
     */
-}
 }
