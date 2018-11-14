@@ -42,7 +42,7 @@ void draw_menu(Adafruit_ILI9341 display){
 void draw_empty_grid(Adafruit_ILI9341 display, int BOXSIZE){
   // Need to do this to rotate to standard game rotations as specified in readme (after main menu).
   display.setRotation(0);
-  
+
   display.fillScreen(ILI9341_BLACK);
 
   // Draws a 6 x 7 grid of 40x40 pixel boxes
