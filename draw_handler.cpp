@@ -3,10 +3,12 @@
 #include <Adafruit_ILI9341.h> // Controller chip library
 #include "TouchScreen.h"    //Library for TouchScreen
 
-// Draws win if you won, lose if you lost (0 is lose, 1 is win, 2 is tie)
+// Draws outcome (0 is lose, 1 is win, 2 is tie)
 void draw_outcome(Adafruit_ILI9341 display, int win_status){
   // Need to do this to rotate text
   display.setRotation(1);
+
+  // Set text size and color
   display.setTextColor(ILI9341_WHITE);
   display.setTextSize(10);
 
@@ -43,6 +45,23 @@ void draw_menu(Adafruit_ILI9341 display){
   display.drawChar((((3 * display.width()) / 4) - (char_size * (5 / 2))), ((display.height() / 2)- (char_size * (7 / 2))), '2', ILI9341_WHITE, ILI9341_BLUE, char_size);
 }
 
+// Draws a waiting screen when waiting for a response from the other arduino
+void draw_waiting(Adafruit_ILI9341 display){
+  // Need to do this to rotate text
+  display.setRotation(1);
+
+  // Fill screen with black
+  display.fillScreen(ILI9341_BLACK);
+
+  // Set text size and color
+  display.setTextColor(ILI9341_WHITE);
+  display.setTextSize(5);
+
+  display.setCursor(40, 103);
+  display.print("Waiting.");
+
+}
+
 // Draws an empty grid
 void draw_empty_grid(Adafruit_ILI9341 display, int BOXSIZE){
   // Need to do this to rotate to standard game rotations as specified in readme (after main menu).
@@ -74,6 +93,12 @@ void draw_cancel(Adafruit_ILI9341 display, int BOXSIZE){
   display.fillRect(0, 0, 120, BOXSIZE, ILI9341_RED);
 }
 
+// Draws an empty battleship map
+void draw_empty_map(Adafruit_ILI9341 display, int BOXSIZE){
+  draw_empty_grid(display, BOXSIZE);
+  draw_grey_confirm(display, BOXSIZE);
+  draw_cancel(display, BOXSIZE);
+}
 
 // Fill in grid box at a given location
 void draw_at_grid_pos(Adafruit_ILI9341 display, int BOXSIZE, String grid_pos, int color){

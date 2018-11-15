@@ -5,7 +5,6 @@
 /// TODO: EVERYTHING IS UPDATED ON COMMUNICATION HANDLER. NOT THIS.
 
 /* TODO:
-
 0. each arduino will have an array from A5 to G0
   >>> element 0 is block A0, element 1 is B0... element 41 is block G5
     to keep track of which blocks have been selected
