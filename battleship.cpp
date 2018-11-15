@@ -4,7 +4,8 @@
 #include "TouchScreen.h"    //Library for TouchScreen
 #include "touch_handler.h"  // touch handler header file
 #include "draw_handler.h" // draw handler header file
-#include "game.h"
+#include "game.h" // game class
+#include "client.h" // client class
 
 
 // These are the four touchscreen analog pins
@@ -26,12 +27,16 @@ TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
 // Game global object with initial state set to 0, game_mode set to 0 (since we haven't selected a mode yet)
 Game battleship = Game(0, 0);
 
+// Client global object
+Client client;
+
 // Define grid box size (40x40)
 #define BOXSIZE 40
 
 void setup() {
   init();
   Serial.begin(9600);
+  Serial3.begin(9600);
   Serial.println("Welcome to Battleship!");
 
   tft.begin();
@@ -43,29 +48,68 @@ void play_game(){
   // Calibrate minimum pressure to be considered a touch
   #define MINPRESSURE 10
 
+  // These variables need to be moved into a function TODO
+  int squares_allowed = 5;
+  int squares_selected = 0;
+  String selected[squares_allowed];
+  String pos;
+
   while(1){
 
     // Get a point and map it to the screen dimensions
     TSPoint p = get_point(tft, ts);
 
-    // If the point has not enough pressure, repeat the loop (no press registers)
+    // If the point doesn't have enough pressure, restart from the top (no press registers)
     if (p.z < MINPRESSURE) {
      continue;
     }
-    int mode;
     switch (battleship.get_state()) {
 
       case 0:
         // Check what mode we are entering and update the battleship's game mode
         battleship.update_game_mode(tft, p);
-        // If we make it down here, it means a screen press has been registered, update the game state.
+
+        // Send "I am ready!" message to other arduino
+        client.send_ready_message();
+
+        // Wait for opponenet to respond
+        client.wait(tft);
+
+        // If we make it down here, it means a screen press has been registered on both arduinos
+        // so we should update the game state
         battleship.update_state(1);
+
+        // Draw an empty map
+        draw_empty_map(tft, BOXSIZE);
         break;
 
       case 1:
-        Serial.println("here");
-        delay(1000);
-        // Wait for player to set up all ships
+        if(squares_selected < squares_allowed){
+          pos = get_grid_position(p, BOXSIZE);
+          selected[squares_selected] =  pos;
+          Serial.println(selected[squares_selected]);
+          squares_selected++;
+          delay(50);
+          continue;
+        }
+        Serial.println(selected[0]);
+        Serial.println(selected[1]);
+        Serial.println(selected[2]);
+        Serial.println(selected[3]);
+        Serial.println(selected[4]);
+        Serial.println();
+        // Send "I am ready!" message to other arduino
+        client.send_ready_message();
+
+        // Wait for opponenet to respond
+        client.wait(tft);
+
+        // If we make it down here, it means both arduinos have selected their tiles
+        // It is time to update the gamestate.
+        battleship.update_state(2);
+
+        // Draw an empty map
+        draw_empty_map(tft, BOXSIZE);
         break;
 
       case 2:
