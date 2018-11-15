@@ -122,4 +122,5 @@ int main(){
   if my_turn(my_array)
   if enemy_turn(enemy_array)
   ///put this in main file
+
 */

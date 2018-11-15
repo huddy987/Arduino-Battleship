@@ -3,7 +3,7 @@
 #include <Adafruit_ILI9341.h> // Controller chip library
 #include "TouchScreen.h"    //Library for TouchScreen
 
-// Draws win if you won, lose if you lost (0 is lose, 1 is win)
+// Draws win if you won, lose if you lost (0 is lose, 1 is win, 2 is tie)
 void draw_outcome(Adafruit_ILI9341 display, int win_status){
   // Need to do this to rotate text
   display.setRotation(1);
@@ -20,6 +20,11 @@ void draw_outcome(Adafruit_ILI9341 display, int win_status){
     display.setCursor(50, 85);
     display.fillScreen(ILI9341_GREEN);
     display.print("Win!");
+  }
+  else if (win_status == 2){
+    display.setCursor(50, 85);
+    display.fillScreen(ILI9341_YELLOW);
+    display.print("Tie!");
   }
 }
 
@@ -52,6 +57,21 @@ void draw_empty_grid(Adafruit_ILI9341 display, int BOXSIZE){
       display.drawRect((display.width() - BOXSIZE * j), (display.height() - BOXSIZE * i), BOXSIZE, BOXSIZE, ILI9341_WHITE);
     }
   }
+}
+
+// Draws a grey confirm button
+void draw_grey_confirm(Adafruit_ILI9341 display, int BOXSIZE){
+  display.fillRect(120, 0, 120, BOXSIZE, 0x8410);
+}
+
+// Draws a green confirm button
+void draw_green_confirm(Adafruit_ILI9341 display, int BOXSIZE){
+  display.fillRect(120, 0, 120, BOXSIZE, ILI9341_GREEN);
+}
+
+// Draws a red cancel button
+void draw_cancel(Adafruit_ILI9341 display, int BOXSIZE){
+  display.fillRect(0, 0, 120, BOXSIZE, ILI9341_RED);
 }
 
 
