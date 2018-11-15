@@ -3,12 +3,14 @@
 
 // header file for touch handler
 
+// Gets a point and maps it to the screen dimensions
 TSPoint get_point(Adafruit_ILI9341 tft, TouchScreen ts);
 
-int get_game_mode(Adafruit_ILI9341 display, TSPoint point);
-
+// Checks if confirm or cancel button was pressed
 int get_confirm_or_cancel(TSPoint point);
 
+
+// Gets the box selected and returns it in the from "[letter][number]"
 String get_grid_position(TSPoint point, int BOXSIZE);
 
 
