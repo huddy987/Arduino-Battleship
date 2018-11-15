@@ -37,7 +37,7 @@ uint16_t determine_array_element(String grid_pos){
   uint16_t column = static_cast<int>(grid_pos[0]) - 64;
   uint16_t row = static_cast<int>(grid_pos[1]) - 48;
   uint16_t element = column + (row * 7) -1;
-  return element
+  return element;
   }
 
 /* if all parts of the boat with boat_id has been shot,
@@ -105,7 +105,6 @@ void after_enemy_update(uint16_t player_array[][2], uint16_t block_number){
 
 /*
 void update_game_array(uint16_t player_array[][2], uint16_t block_number){
-    /*
     *(*(player_array + block_number)) == the boat ID
     *(*(player_array + block_number) + 1) == the block state
     // *(*(arramina + 3)+1); 4th row, 2nd column
@@ -174,5 +173,5 @@ void update_game_array(uint16_t player_array[][2], uint16_t block_number){
       break;
    default : //Optional
       Serial.print("Error");
-}
+    }
 }
