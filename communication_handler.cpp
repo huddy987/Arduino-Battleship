@@ -22,13 +22,14 @@ void send_the_block(String grid_pos){
 
 }
 
-/* each arduino will have an array from A5 to G0
+each arduino will have an array from A5 to G0
   >>> element 0 is block A5 and element 41 is block G0
     to keep track of which blocks have been selected
     keep this array in the stack of the main file in order
     make it permanent
-*/
+
 void recieve_the_block(){
   String enemy_block = Serial3.read();
 
 }
+*/

@@ -7,18 +7,41 @@
 #include "touch_handler.h"  //touch handler header file
 #include "draw_handler.h" // Draw handler header file
 
-// Check how many players are selected and go to appropriate game mode
-void get_game_mode(Adafruit_ILI9341 display, TSPoint point){
-  if (point.x > 120){
-    //TODO: Single player
-    Serial.print("1 player mode selected.");
-    draw_empty_grid(display, 40);
+// Get a point if there is enough pressure, and map it to the screen dimensions
+TSPoint get_point(Adafruit_ILI9341 tft, TouchScreen ts){
+  // This is calibration data for the raw touch data to the screen coordinates
+  #define TS_MINX 150
+  #define TS_MINY 120
+  #define TS_MAXX 920
+  #define TS_MAXY 940
+
+  // Get a point
+  TSPoint p = ts.getPoint();
+
+  // Scale from 0->1000 to tft.width and tft.height using the calibration #'s
+  p.x = map(p.x, TS_MINX, TS_MAXX, 0, tft.width() + 10);
+  p.y = map(p.y, TS_MINY, TS_MAXY, 0, tft.height());
+
+  return p;
+}
+
+
+// Check if confirm or cancel has been pressed
+// Returns: 0 (none), 1 (confirm), 2 (cancel)
+int get_confirm_or_cancel(TSPoint point){
+  // If we are in the menu region
+  if (point.y < 40){
+    // If we are in the confirm region, return 1
+    if (point.x > 120){
+      return 1;
+    }
+    // If we are in the cancel region, return 2
+    else if (point.x < 120){
+      return 2;
+    }
   }
-  else if (point.x < 120){
-    //TODO: 2 players
-    Serial.print("2 players mode selected.");
-    draw_empty_grid(display, 40);
-  }
+  // If we are not in the menu region, return 0
+  return 0;
 }
 
 // Returns the grid position in the for [LETTER][NUMBER] as a string
