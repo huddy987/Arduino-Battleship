@@ -1,20 +1,29 @@
 #ifndef _DATA_HANDLER_H_
 #define _DATA_HANDLER_H_
 
+class Num
+{
+public:
+uint8_t boat_id, block_state,enemy_state;
+Block();
+uint8_t getBoat();
+uint8_t getBlock();
+uint8_t getEnemy();
+};
+
 uint8_t determine_array_element(String grid_pos);
 
-uint8_t check_all_boat_sunk(uint8_t play_arr[][2], uint8_t boat_id);
+bool check_all_boat_sunk(Block play_arr[], uint8_t boat_id);
 
-void kill_entire_boat(uint8_t play_arr[][2], uint8_t boat_id);
+uint8_t kill_entire_boat(Block play_arr[], uint8_t boat_id);
 
-void recieve_turn(uint8_t player_array[][2], uint8_t enemy_block_number);
+void send_boat_death(Block play_arr[], uint8_t boat_id, uint8_t boat_death);
 
-void kill_entire_enemy_boat(uint8_t play_arr[][2], uint8_t boat_id);
+void recieve_turn(Block player_array[], uint8_t enemy_block_number)
 
-void update_my_array(uint8_t player_array[][2], uint8_t my_block_number);
+void update_my_array(Block play_arr[], uint8_t my_block_number)
 
-void making_a_turn(String grid_pos,uint8_t player_array[][2]);
+void making_a_turn(String grid_pos, Block player_array[])
 
-void print_array(uint8_t play_arr[][2]);
 
 #endif

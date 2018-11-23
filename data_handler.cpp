@@ -2,7 +2,39 @@
 #include <SPI.h>             // Library for SPI mode
 #include <Adafruit_ILI9341.h>
 #include <Arduino.h>
-/// TODO: EVERYTHING IS UPDATED ON COMMUNICATION HANDLER. NOT THIS.
+
+// (*(play_arr + #)) --> this is the block object
+/*
+              A   B   C   D   E   F   G
+      -----------------------------------
+      |  M  |   |   |   |   |   |   |   | 5
+      |     |---------------------------|
+      |  E  |   |   |   |   |   |   |   | 4
+      |     |---------------------------|
+      |  N  |   |   |   |   |   |   |   | 3
+      |     |---------------------------|
+      |  U  |   |   |   |   |   |   |   | 2
+      |     |---------------------------|
+      |  "  |   |   |   |   |   |   |   | 1
+      |     |---------------------------|
+      |  "  | 00  | 01  | 02  | 03 | 04 | 05 | 06 | 0
+      -----------------------------------
+*/
+
+
+/*
+const int gen_pin = 1;
+
+void setup() {
+    init();
+    pinMode(gen_pin, INPUT);
+    Serial.begin(9600);
+    Serial3.begin(9600);
+    Serial.flush();
+    Serial3.flush();
+}
+*/
+
 
 /* TODO:
 0. each arduino will have an array from A5 to G0
@@ -33,10 +65,32 @@
 
 
 /*
- * converts the grid position as given by a string grid_pos
- * and returns the block's index in the player's array
-*/
+  uint8_t boat_id - the id of the boat that resides there
+  uint8_t block_state - the state of my block
+  uint8_t enemy_state - the enemy block state from my POV
 
+*/
+class Block {
+    public:
+      uint8_t boat_id, block_state,enemy_state;
+      Block()  // declares the constructor --> initiates all values as 0
+      {
+        boat_id = 0;
+        block_state = 0;
+        enemy_state = 0;
+      }
+      uint8_t getBoat(){return boat_id;}
+      uint8_t getBlock(){return block_state;}
+      uint8_t getEnemy(){return enemy_state;}
+};
+
+
+/*
+  when in doubt, double check.
+
+  Inputs: grid_pos - A0 to %5
+  Output: element - which block number it is
+*/
 uint8_t determine_array_element(String grid_pos){
   //idk if I can index strings in C++ so this should be fun to test
   uint8_t column = static_cast<int>(grid_pos[0]) - 64;
@@ -46,152 +100,264 @@ uint8_t determine_array_element(String grid_pos){
 }
 
 
+/*   DEBUGGING
+// printing this for debugging
+void print_blocks(Block player_array[]){
+  Serial.println("My Block States");
+  for(int i=1; i<43; i++){
+    if ((i%7)==0) {Serial.print((*(player_array + i - 1)).getBlock());Serial.println();}
+    else {Serial.print((*(player_array + i - 1)).getBlock());}
+  }
+  Serial.println();
+}
+
+// printing for debugging
+void print_boats(Block player_array[]){
+  Serial.println("My Enemy States");
+  for(int i=1; i<43; i++){
+    if ((i%7)==0) {Serial.print((*(player_array + i - 1)).getEnemy());Serial.println();}
+    else {Serial.print((*(player_array + i - 1)).getEnemy());}
+  }
+  Serial.println();
+}
+*/
+
+
+
 /*
-  Input: player array and the boat id
-  Output: 1 if all parts of the boat has been shot
-              --- if all blocks with the same boat id has been shot
-          0 otherwise
-*/ // THIS WORKS
-uint8_t check_all_boat_sunk(uint8_t play_arr[][2], uint8_t boat_id){
+Inputs: the player's array and the boat id
+Output: true - if all blocks with the same boat id has been shot (==3)
+        false - otherwise
+*/
+bool check_all_boat_sunk(Block play_arr[], uint8_t boat_id){
   uint8_t i, return_val;
   uint8_t boat_count = 0;
   uint8_t shot_count = 0;
 
-  for(i=0;i<42;i++) {   /// idk if this should be 41 or 42
-    if (**(play_arr + i) == boat_id) {
+  for(i=0;i<42;i++) {   /// count how many blocks has the same boat id
+    if (((*(play_arr + i)).getBoat()) == boat_id) {
       boat_count++;
-    }
-    // if it's been shot but full boat isnt dead
-    if (*(*(play_arr + i) + 1) == 3) {
+    
+    // if it's been shot and same boat id
+    if (((*(play_arr + i)).getBlock()) == 3) {
       shot_count++;
     }
+  }
   if (boat_count == shot_count){
-    return_val = 1;
-  } else {return_val = 0;}
+    return_val = true;
+  } else {return_val = false;}
   }
   return return_val;
 }
 
+
 /*
-  Input: player array and the boat id
-  Output: no output but it updates the player's array
-          -- all blocks with the same boat id will
-              be "dead" (hold a state of 4). entire boat is dead
-*/ // THIS WORKS
-void kill_entire_boat(uint8_t play_arr[][2], uint8_t boat_id){
+This will transform all blocks with the same boat id into shot (==4)
+Inputs: the player's array and the boat id
+Output: the number of blocks that's been equated to 4 (died)
+ */
+uint8_t kill_entire_boat(Block play_arr[], uint8_t boat_id){
   uint8_t i;
+  uint8_t count = 0;
   for(i=0;i<42;i++) {   /// TODO: check here later
-  if (**(play_arr + i) == boat_id) {
-    (*(*(play_arr + i) + 1)) = 4;
+  if (((*(play_arr + i)).getBoat()) == boat_id) {
+    (*(play_arr + i)).block_state = 4;
+    count++;
   }
  }
+ return count;
 }
 
-/* re
- reads which block the enemy entered and updates the game array accordingly
-// if theblock is undisturbed (0) it should go to 1 (shot, no boat)
-// if there is a hidden boat (2), send to 3 (if full boat not dead)
-//                                send to 4 (if full boat dead)
+/*
+This should send '7' followed by the amount of blocks that died.
+then the block numbers of the blocks
+
+Inputs: the player's array
+        boat id  - id of the boat that died
+        boat_death - how many blocks died
+Output: none. for communication only
+
 */
+void send_boat_death(Block play_arr[], uint8_t boat_id, uint8_t boat_death){
+  // Serial3.write(7);
+  // Serial3.write(boat_death);
+
+  // Serial.print("Dying boats: "); Serial.println(boat_death);  // --> this is for debugging
+  for(int i=0;i<42;i++) {
+  if (((*(play_arr + i)).getBoat()) == boat_id) {
+    if ((*(play_arr + i)).block_state == 4) {  // this embedded if statement should always be true
+      // Serial3.print(i)  --> send the blocks that died
+
+      // Serial.println(i);
+    }
+  }
+ } //Serial.println();
+}
+
 
 /*
-Input: player array and the what block the enemy entered
-Output: no output but it updates the player's array
-      will check what the state of that block is.
-        -- if 0 (no boat) --> becomes 1 (shot, but no boat)
-        -- if 2 (hidden boat) --> becomes 3
-            -->checks if all blocks with the same boat id has been shot,
-                if true, all of the said blocks --> 4 (full boat sunk)
-*/
-void recieve_turn(uint8_t player_array[][2], uint8_t enemy_block_number){
-  uint8_t boat_id;
- /*
-  *(*(player_array + block_number)) == the boat ID
-  *(*(player_array + block_number) + 1) == the block state
-  */
+will check what the state of my block is
+if == 0, send them a 5. This means they shot nothing
+if == 2, check if they sunk an entire boat.
+  if they sunk an entire boat. send_boat_death(...); executes
+  else, send them a 6
 
-  switch (*(*(player_array + enemy_block_number) + 1)) {
-    case 0 :  // undisturbed
-      *(*(player_array + enemy_block_number) + 1) = 1;
-      Serial3.write(5); // tell them that shot but no boat;
+Inputs: the player's array
+        enemy_block_number - the block that the enemy wants to attack
+Outputs: none.
+*/
+void recieve_turn(Block player_array[], uint8_t enemy_block_number){
+uint8_t boat_id, boat_death;
+  switch ((*(player_array + enemy_block_number)).getBlock()) {
+    case 0 :  // undisturbed --> make it a 1 on my block state
+      (*(player_array + enemy_block_number)).block_state = 1;
+      // Serial3.write(5); // tell them that shot but no boat;
       break;
 
     case 2 :  // boat hidden; not shot
-      *(*(player_array + enemy_block_number) + 1) = 3;
-      boat_id = *(*(player_array + enemy_block_number));
+      (*(player_array + enemy_block_number)).block_state = 3;
+      boat_id = (*(player_array + enemy_block_number)).getBoat();
 
-      //if all boat dead, the if-statement will execute
+      //if all blocks with the same boat has been shot, the if-block will execute
       if (check_all_boat_sunk(player_array, boat_id)){
-        // kill their entire boat with the same boat id
-        kill_entire_boat(player_array, boat_id);
-        Serial3.write(7);
+        boat_death = kill_entire_boat(player_array, boat_id);
+        send_boat_death(player_array, boat_id, boat_death);
+
       } else {Serial3.write(6);}
       break;
     default :
       Serial.print("Error");
-  }
+    }
 }
 
-/*
-  Input: player array and the boat id
-  Output: no output but it updates the player's array
-          -- all blocks with the same boat id will
-              be 7 (enemy's full boat sunk). entire boat is dead
-*/
-void kill_entire_enemy_boat(uint8_t play_arr[][2], uint8_t boat_id){
-  uint8_t i;
-  for(i=0;i<42;i++) {   /// TODO: check here later
-  if (**(play_arr + i) == boat_id) {
-    (*(*(play_arr + i) + 1)) = 7;
-  }
- }
-}
+
 
 /*
-  Input: player array and my_block_number (the block number I picked)
-  Output: no output but it updates the player's array
-        if the enemy sent me a
-          -- 5 - I shot there, but there was no boat
-          -- 6 - shot there and there was a boat
-          -- 7 - shot, yes boat, and the entire boat has been sunk
-               - if this case, make all blocks with the same boat id = 7
-*/
+this is what happens after I shoot my enemy's blocks
+Enemy will tell me what happened and I will update 
+my array accordingly
 
-void update_my_array(uint8_t player_array[][2], uint8_t my_block_number){
+Switch Case
+  -5: I shot something but it didn't sink
+  -6: I shot a boat but only one block of it, not the whole thing
+  -7: I killed the entire boat.
+      --> this should then recieve the number of blocks that died
+      --> then, in a for-loop, recieve the blocks make them = 7
+
+
+Inputs: the player's array
+        my_block_number - the block number that I shot
+Outputs: none.
+*/
+void update_my_array(Block play_arr[], uint8_t my_block_number){
   uint8_t boat_id;
+  uint8_t block_died;
+  uint8_t boat_deaths;
+  uint8_t enemy_response;
 
-  // its just gonna wait until the other arduino sends their response
-  while (Serial3.available() < 7){ };
-  uint8_t enemy_response = Serial3.read();
+  // read the enemy's response here
+  // enemy_response = Serial3.read();
+
   switch (enemy_response) {
-    case 5:  // you shot nothing
-    *(*(player_array + my_block_number) + 1) = 5;
+    case 5:
+      // Serial.println("5"); --> for debugging only
+      (*(play_arr + my_block_number)).enemy_state = 5;
       break;
 
-    case 6 :  // you shot something, but boat didn't die
-      *(*(player_array + my_block_number) + 1) = 6;
+    case 6 :
+      // Serial.println("6"); --> for debugging only
+      (*(play_arr + my_block_number)).enemy_state = 6;
       break;
 
-    case 7 :  // you shot the boat and all parts of it has been shot.
-      boat_id = *(*(player_array + my_block_number));
+    case 7 :
+      // Serial.println("7");  --> for debugging only
 
-      // make all blocks with the same boat id (block state = 7)
-      kill_entire_enemy_boat(player_array, boat_id);
-
+      // boat_deaths = Serial3.read();  // --> how many blocks died
+      // for (int i=0;i<boat_deaths;i++){
+        // block_died =  Serial.read();
+        // (*(play_arr + block_died)).enemy_state = 7;
       break;
-    default :
+    default :  // should never execute
       Serial.println("Error in update_my_array");
   }
 }
 
-// Input: the grid_pos - the grid position that the player entered
-//        player_array - the payer's array that contains the state of every block
-void making_a_turn(String grid_pos,uint8_t player_array[][2]){
-  uint8_t my_block_number = determine_array_element(grid_pos); // change the A5 here
-  Serial3.write(my_block_number);   // send your block number
-  while (Serial3.available() < 7){ }   // its just gonna wait until then
-    // this is the bock that the enemy has selected
-  uint8_t enemy_block_number = Serial3.read(); // recieve their block#
+
+
+
+/* 
+  This function might be extraneous but the logic is here
+
+  1. send them which block you want to attack
+  2. recieve which block they want to attack
+  3. recieve_turn - see how their attack affects me
+  4. update_my_array - see how my attack affected them
+*/
+void making_a_turn(String grid_pos, Block player_array[]) {
+  uint8_t my_block_number = determine_array_element(grid_pos);
+  Serial3.write(my_block_number);
+
+  uint8_t enemy_block_number = Serial3.read();
   recieve_turn(player_array, enemy_block_number);
   update_my_array(player_array, my_block_number);
 }
+
+
+
+
+// Initialize the player's array by this.
+// all 3 values of all blocks will == 0 initially
+/*
+Block game_arr[] = {Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),
+    Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),
+    Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),
+    Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block()};
+*/
+
+
+
+/*  DEBUGGING 
+  This main is for debugging purposes only
+  Everything under this is not needed for your purpose
+
+int main() {
+  setup();
+
+  /// I could also implement a default constructor but for now,
+  /// they all start with a value of 0
+  // create an array of blocks will all have values of zero
+  Block game_arr[] = {Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),
+    Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),
+    Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),
+    Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block()};
+    // --> idk how to put this in a for loop
+
+
+    (game_arr[15]).block_state = 2;
+    (game_arr[16]).block_state = 3;
+    (game_arr[17]).block_state = 3;
+    (game_arr[41]).block_state = 2;
+    (game_arr[15]).boat_id = 90;
+    (game_arr[16]).boat_id = 90;
+    (game_arr[17]).boat_id = 90;
+    (game_arr[41]).boat_id = 90;
+
+
+    print_blocks(game_arr);
+    print_boats(game_arr);
+    recieve_turn(game_arr, 15);
+    print_blocks(game_arr);
+    print_boats(game_arr);
+    recieve_turn(game_arr, 41);
+    print_blocks(game_arr);
+    print_boats(game_arr);
+    update_my_array(game_arr, 8);
+    print_blocks(game_arr);
+    print_boats(game_arr);
+    // Serial.println((game_arr[9]).getBoat);
+
+    while (true) { }
+        // if there are bytes in the user's arduino buffer
+    Serial.end();
+    return 0;
+} */
