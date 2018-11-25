@@ -5,8 +5,8 @@
 #include "TouchScreen.h"    //Library for TouchScreen
 
 // Game object constructor
-Game::Game(int user_state, int game_mode){
-  _state = user_state;
+Game::Game(int game_state, int game_mode){
+  _state = game_state;
   _mode = game_mode;
 }
 
