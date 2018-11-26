@@ -116,3 +116,11 @@ void draw_at_grid_pos(Adafruit_ILI9341 display, int BOXSIZE, String grid_pos, in
     }
   }
 }
+
+// Clears selected tile(s)
+void clear_all_selections(Adafruit_ILI9341 display, int BOXSIZE, String block_array[], int length){
+  for(int i = 0; i < length; i++){
+    draw_at_grid_pos(display, BOXSIZE, block_array[i], ILI9341_BLACK);   // Draw black at every previously selected square
+  }
+  draw_grey_confirm(display, BOXSIZE);  // Draws a grey confirm button
+}

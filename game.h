@@ -13,8 +13,7 @@ State codes:
 0 - main menu
 1 - setting up ships
 2 - playing turn
-3 - playing, but waiting for opponent action
-4 - end game screen
+3 - end game screen
 */
 
 class Game{
