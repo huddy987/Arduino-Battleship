@@ -9,6 +9,11 @@ class Client{
     // Prints a "ready" character over serial3
     void send_ready_message();
 
+    // Sends own grid coordinates over serial3
+    void send_ships(String boat_array[], int length);
+
+    // Receive opponents grid coordinates over serial3
+    String *receive_ships(int length);
 };
 
 
