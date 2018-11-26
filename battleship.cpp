@@ -47,6 +47,31 @@ void setup() {
   // Draw menu
   draw_menu(tft);
 }
+
+// Handles main menu functionality
+void main_menu(Adafruit_ILI9341 tft, TSPoint point, int BOX_SIZE){
+  // Check what mode we are entering and update the battleship's game mode
+  battleship.update_game_mode(tft, point);
+
+  // Send "I am ready!" message to other arduino
+  client.send_ready_message();
+
+  // Wait for opponenet to respond
+  client.wait(tft);
+
+  // If we make it down here, it means a screen press has been registered on both arduinos
+  // so we should update the game state
+  battleship.update_state(1);
+
+  // Draw an empty map
+  draw_empty_map(tft, BOX_SIZE);
+}
+
+// Handles game set up
+void setup_game(Adafruit_ILI9341 tft, TSPoint point, int BOX_SIZE){
+
+}
+
 void play_game(){
   // Calibrate minimum pressure to be considered a touch
   #define MINPRESSURE 10
@@ -54,7 +79,6 @@ void play_game(){
   // These variables need to be moved into a function TODO
   int squares_selected = 0;
   String selected[squares_allowed] = {};
-  String pos;
   int already_selected;
   String *opponent;
 
@@ -68,30 +92,17 @@ void play_game(){
      continue;
     }
 
+    // Stores grid position in "A0" notation
+    String pos = get_grid_position(point, BOXSIZE);
+
     switch (battleship.get_state()) {
 
       case 0:
-        // Check what mode we are entering and update the battleship's game mode
-        battleship.update_game_mode(tft, point);
-
-        // Send "I am ready!" message to other arduino
-        client.send_ready_message();
-
-        // Wait for opponenet to respond
-        client.wait(tft);
-
-        // If we make it down here, it means a screen press has been registered on both arduinos
-        // so we should update the game state
-        battleship.update_state(1);
-
-        // Draw an empty map
-        draw_empty_map(tft, BOXSIZE);
+        main_menu(tft, point, BOXSIZE);
         break;
 
       case 1:
         already_selected = 0;
-        // Stores grid position in "A0" notation
-        pos = get_grid_position(point, BOXSIZE);
 
         // If cancel is pressed, reset everything
         if(get_confirm_or_cancel(point) == 2){  // If cancel is pressed
@@ -123,11 +134,9 @@ void play_game(){
           else{
             selected[squares_selected] =  pos;  // Store the grid position in our array
             Serial.println(selected[squares_selected]);
-            if(selected[squares_selected]){   // Double check in case we accidentally press on a white border
-              draw_at_grid_pos(tft, BOXSIZE, pos, ILI9341_GREEN); // Draw green so the user knows we've registered their press
-              squares_selected++;
-              Serial.println(squares_selected);
-            }
+            draw_at_grid_pos(tft, BOXSIZE, pos, ILI9341_GREEN); // Draw green so the user knows we've registered their press
+            squares_selected++;
+            Serial.println(squares_selected);
           }
 
           // If we still have less squares then the allowed amount, restart the loop.
@@ -162,7 +171,7 @@ void play_game(){
         // Something like: Player player = Player(18, selected, opponent)
 
         // If we make it down here, it means both arduinos have selected their tiles
-        // It is time to update the gamestate.
+        // So we should update the gamestate
         battleship.update_state(2);
 
         // Draw an empty map
@@ -170,14 +179,26 @@ void play_game(){
         break;
 
       case 2:
-        // Wait for player to lock in response
+        // Select a square
+
+        // Show green confirm button
+
+        // Wait for other arduino
+
+        // Update enemy map from your selection, and your own map from data received over serial3
+
+        // Check if you have lost
+
+        // Wait for your opponent to tell you if they lost
+
+        // If your opponent lost, set gamestate to 3, game is over
+
+        // Else draw your own map (updated) for 5 seconds
+
+        // Show your opponents map (updated)
         break;
 
       case 3:
-        // Wait for opponent to lock in response
-        break;
-
-      case 4:
         // Show final game state
         break;
     }
