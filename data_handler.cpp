@@ -2,6 +2,7 @@
 #include <SPI.h>             // Library for SPI mode
 #include <Adafruit_ILI9341.h>
 #include <Arduino.h>
+#include "data_handler.h"
 
 // (*(play_arr + #)) --> this is the block object
 /*
@@ -70,20 +71,23 @@ void setup() {
   uint8_t enemy_state - the enemy block state from my POV
 
 */
-class Block {
-    public:
-      uint8_t boat_id, block_state,enemy_state;
+Block::Block(){
+      boat_id = 0;
+      block_state = 0;
+      enemy_state = 0;
+      /*
       Block()  // declares the constructor --> initiates all values as 0
       {
         boat_id = 0;
-        block_state = 0;
-        enemy_state = 0;
-      }
-      uint8_t getBoat(){return boat_id;}
-      uint8_t getBlock(){return block_state;}
-      uint8_t getEnemy(){return enemy_state;}
-};
+        block_state = 0;*/
+}
 
+void Block::updateBoat(uint8_t num){boat_id = num;}
+void Block::updateBlock(uint8_t num){block_state = num;}
+void Block::updateEnemy(uint8_t num){enemy_state = num;}
+uint8_t Block::getBoat(){return boat_id;}
+uint8_t Block::getBlock(){return block_state;}
+uint8_t Block::getEnemy(){return enemy_state;}
 
 /*
   when in doubt, double check.
@@ -161,7 +165,7 @@ uint8_t kill_entire_boat(Block play_arr[], uint8_t boat_id){
   uint8_t count = 0;
   for(i=0;i<42;i++) {   /// TODO: check here later
   if (((*(play_arr + i)).getBoat()) == boat_id) {
-    (*(play_arr + i)).block_state = 4;
+    (*(play_arr + i)).updateBlock(4);
     count++;
   }
  }
@@ -185,7 +189,7 @@ void send_boat_death(Block play_arr[], uint8_t boat_id, uint8_t boat_death){
   // Serial.print("Dying boats: "); Serial.println(boat_death);  // --> this is for debugging
   for(int i=0;i<42;i++) {
   if (((*(play_arr + i)).getBoat()) == boat_id) {
-    if ((*(play_arr + i)).block_state == 4) {  // this embedded if statement should always be true
+    if ((*(play_arr + i)).getBlock() == 4) {  // this embedded if statement should always be true
       // Serial3.print(i)  --> send the blocks that died
 
       // Serial.println(i);
@@ -210,12 +214,14 @@ void recieve_turn(Block player_array[], uint8_t enemy_block_number){
 uint8_t boat_id, boat_death;
   switch ((*(player_array + enemy_block_number)).getBlock()) {
     case 0 :  // undisturbed --> make it a 1 on my block state
-      (*(player_array + enemy_block_number)).block_state = 1;
+      // (*(player_array + enemy_block_number)).block_state = 1;
+      (*(player_array + enemy_block_number)).updateBlock(1);
       // Serial3.write(5); // tell them that shot but no boat;
       break;
 
     case 2 :  // boat hidden; not shot
-      (*(player_array + enemy_block_number)).block_state = 3;
+      // (*(player_array + enemy_block_number)).block_state = 3;
+      (*(player_array + enemy_block_number)).updateBlock(3);
       boat_id = (*(player_array + enemy_block_number)).getBoat();
 
       //if all blocks with the same boat has been shot, the if-block will execute
@@ -261,12 +267,14 @@ void update_my_array(Block play_arr[], uint8_t my_block_number){
   switch (enemy_response) {
     case 5:
       // Serial.println("5"); --> for debugging only
-      (*(play_arr + my_block_number)).enemy_state = 5;
+      // (*(play_arr + my_block_number)).enemy_state = 5;
+      (*(play_arr + my_block_number)).updateBlock(5);
       break;
 
     case 6 :
       // Serial.println("6"); --> for debugging only
-      (*(play_arr + my_block_number)).enemy_state = 6;
+      // (*(play_arr + my_block_number)).enemy_state = 6;
+      (*(play_arr + my_block_number)).updateBlock(6);
       break;
 
     case 7 :
