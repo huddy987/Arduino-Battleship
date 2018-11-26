@@ -268,13 +268,13 @@ void update_my_array(Block play_arr[], uint8_t my_block_number){
     case 5:
       // Serial.println("5"); --> for debugging only
       // (*(play_arr + my_block_number)).enemy_state = 5;
-      (*(play_arr + my_block_number)).updateBlock(5);
+      (*(play_arr + my_block_number)).updateEnemy(5);
       break;
 
     case 6 :
       // Serial.println("6"); --> for debugging only
       // (*(play_arr + my_block_number)).enemy_state = 6;
-      (*(play_arr + my_block_number)).updateBlock(6);
+      (*(play_arr + my_block_number)).updateEnemy(6);
       break;
 
     case 7 :
@@ -300,7 +300,7 @@ void update_my_array(Block play_arr[], uint8_t my_block_number){
   2. recieve which block they want to attack
   3. recieve_turn - see how their attack affects me
   4. update_my_array - see how my attack affected them
-*/
+
 void making_a_turn(String grid_pos, Block player_array[]) {
   uint8_t my_block_number = determine_array_element(grid_pos);
   Serial3.write(my_block_number);
@@ -308,7 +308,7 @@ void making_a_turn(String grid_pos, Block player_array[]) {
   uint8_t enemy_block_number = Serial3.read();
   recieve_turn(player_array, enemy_block_number);
   update_my_array(player_array, my_block_number);
-}
+} */
 
 
 
