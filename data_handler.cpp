@@ -64,6 +64,11 @@ void setup() {
     iii. if all blocks of a ship has been hit, it will be sunk
 */
 
+      /*
+      Block()  // declares the constructor --> initiates all values as 0
+      {
+        boat_id = 0;
+        block_state = 0;*/
 
 /*
   uint8_t boat_id - the id of the boat that resides there
@@ -75,11 +80,6 @@ Block::Block(){
       boat_id = 0;
       block_state = 0;
       enemy_state = 0;
-      /*
-      Block()  // declares the constructor --> initiates all values as 0
-      {
-        boat_id = 0;
-        block_state = 0;*/
 }
 
 void Block::updateBoat(uint8_t num){boat_id = num;}
