@@ -8,6 +8,7 @@
 Game::Game(int game_state, int game_mode){
   _state = game_state;
   _mode = game_mode;
+  _player_isalive = 1;  // 1: is alive
 }
 
 // Returns the state of the game
@@ -40,4 +41,15 @@ int Game::update_game_mode(Adafruit_ILI9341 display, TSPoint point){
 // Updates the state of the game
 void Game::update_state(int new_state){
   _state = new_state;
+}
+
+// Updates the player alive status
+// Status codes: 0: dead, 1: alive, 2: tie
+void Game::update_is_alive(int new_status){
+  _player_isalive = new_status;
+}
+
+// Returns the player alive status
+int Game::get_is_alive(){
+  return _player_isalive;
 }
