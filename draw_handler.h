@@ -30,5 +30,8 @@ void draw_empty_map(Adafruit_ILI9341 display, int BOXSIZE);
 // Draws a color at a given grid position
 void draw_at_grid_pos(Adafruit_ILI9341 display, int BOXSIZE, String grid_pos, int color);
 
+// Clears selected tile(s)
+void clear_all_selections(Adafruit_ILI9341 display, int BOXSIZE, String block_array[], int length);
+
 
 #endif
