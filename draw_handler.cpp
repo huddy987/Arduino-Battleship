@@ -124,3 +124,38 @@ void clear_all_selections(Adafruit_ILI9341 display, int BOXSIZE, String block_ar
   }
   draw_grey_confirm(display, BOXSIZE);  // Draws a grey confirm button
 }
+
+/*
+0 = undisturbed
+1 = has been shot but no boat
+2 = has a boat hidden; not shot
+3 = has a boat that's been shot
+4 = has a full boat sunk
+5 = enemy's: shot but no boat
+6 = enemy's: shot and there is a boat
+7 = enemy's: full boat sunk
+*/
+// Draws state-relevent color at given grid position
+void draw_state(Adafruit_ILI9341 display, int BOXSIZE, String grid_pos, int state){
+  switch(state){
+    case 0:
+      draw_at_grid_pos(display, BOXSIZE, grid_pos, ILI9341_BLACK);   // Draws black tile if nothing has happened
+      break;
+    case 1:   // Case 1 is the same as case 5 for the purpose of drawing
+    case 5:
+      draw_at_grid_pos(display, BOXSIZE, grid_pos, ILI9341_BLUE);   // Draws blue (water) if shot but no boat
+      break;
+    case 2:
+      draw_at_grid_pos(display, BOXSIZE, grid_pos, 0x8410);   // Draws grey tile if own boat is still hidden
+      break;
+    case 3:  // Case 3 is the same as case 4 for the purpose of drawing
+    case 4:
+      draw_at_grid_pos(display, BOXSIZE, grid_pos, ILI9341_RED);   // Draws red tile if your own boat was hit
+      break;
+    case 6:  // Case 6 is the same as case 7 for the purpose of drawing
+    case 7:
+      draw_at_grid_pos(display, BOXSIZE, grid_pos, ILI9341_GREEN);   // Draws green tile if the enemy boat was hit
+      break;
+  }
+
+}
