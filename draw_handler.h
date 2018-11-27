@@ -33,5 +33,8 @@ void draw_at_grid_pos(Adafruit_ILI9341 display, int BOXSIZE, String grid_pos, in
 // Clears selected tile(s)
 void clear_all_selections(Adafruit_ILI9341 display, int BOXSIZE, String block_array[], int length);
 
+// Draws state-relevent color at given grid position
+void draw_state(Adafruit_ILI9341 display, int BOXSIZE, String grid_pos, int state);
+
 
 #endif
