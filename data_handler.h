@@ -19,6 +19,8 @@ class Block{
 
 uint8_t determine_array_element(String grid_pos);
 
+String determine_block(uint8_t block_number);
+
 bool check_all_boat_sunk(Block play_arr[], uint8_t boat_id);
 
 uint8_t kill_entire_boat(Block play_arr[], uint8_t boat_id);

@@ -90,10 +90,10 @@ uint8_t Block::getBlock(){return block_state;}
 uint8_t Block::getEnemy(){return enemy_state;}
 
 /*
-  when in doubt, double check.
+  Inverse function of determine_block
 
-  Inputs: grid_pos - A0 to %5
-  Output: element - which block number it is
+  Inputs: grid_pos - A0 to G5
+  Output: element - which block number it is (0 to 41)
 */
 uint8_t determine_array_element(String grid_pos){
   //idk if I can index strings in C++ so this should be fun to test
@@ -101,6 +101,33 @@ uint8_t determine_array_element(String grid_pos){
   uint8_t row = static_cast<int>(grid_pos[1]) - 48;
   uint8_t element = column + (row * 7) -1;
   return element;
+}
+
+/*
+  Inverse function of determine_array_element
+
+  Inputs: block_number - 0 to 41 only
+  Output: String block - A0 to G5
+*/
+String determine_block(uint8_t block_number) {
+  String a,b;
+
+  uint8_t column;
+  for (uint8_t i=0; i<7 ; i++) {
+    if (((block_number+i)%7)==0) {column = i; break;}
+  }
+  a = String((column + 65));
+
+  if ((0<=block_number)&&(block_number<=7)) {b = "0";}
+  else if ((7<=block_number)&&(block_number<=13)) {b = "1";}
+  else if ((14<=block_number)&&(block_number<=20)) {b = "2";}
+  else if ((21<=block_number)&&(block_number<=27)) {b = "3";}
+  else if ((28<=block_number)&&(block_number<=34)) {b = "4";}
+  else if ((35<=block_number)&&(block_number<=41)) {b = "5";}
+  else {Serial.println("Error in determine_block.");}
+
+  // Just concatenate String a and String b here
+  return ((a+b));
 }
 
 
@@ -141,7 +168,7 @@ bool check_all_boat_sunk(Block play_arr[], uint8_t boat_id){
   for(i=0;i<42;i++) {   /// count how many blocks has the same boat id
     if (((*(play_arr + i)).getBoat()) == boat_id) {
       boat_count++;
-    
+
     // if it's been shot and same boat id
     if (((*(play_arr + i)).getBlock()) == 3) {
       shot_count++;
@@ -240,7 +267,7 @@ uint8_t boat_id, boat_death;
 
 /*
 this is what happens after I shoot my enemy's blocks
-Enemy will tell me what happened and I will update 
+Enemy will tell me what happened and I will update
 my array accordingly
 
 Switch Case
@@ -293,7 +320,7 @@ void update_my_array(Block play_arr[], uint8_t my_block_number){
 
 
 
-/* 
+/*
   This function might be extraneous but the logic is here
 
   1. send them which block you want to attack
@@ -324,7 +351,7 @@ Block game_arr[] = {Block(),Block(),Block(),Block(),Block(),Block(),Block(),Bloc
 
 
 
-/*  DEBUGGING 
+/*  DEBUGGING
   This main is for debugging purposes only
   Everything under this is not needed for your purpose
 
