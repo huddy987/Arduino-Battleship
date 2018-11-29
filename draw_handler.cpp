@@ -3,6 +3,7 @@
 #include <Adafruit_ILI9341.h> // Controller chip library
 #include "TouchScreen.h"    //Library for TouchScreen
 #include "block.h"
+#include "game.h"
 #include "data_handler.h"   // Contains determine_block() function
 
 // Draws outcome (0 is lose, 1 is win, 2 is tie)
@@ -26,6 +27,8 @@ void draw_outcome(Adafruit_ILI9341 display, int win_status){
     display.print("Win!");
   }
   else if (win_status == 2){
+    // Use black text because white is hard to see on yellow background
+    display.setTextColor(ILI9341_BLACK);
     display.setCursor(50, 85);
     display.fillScreen(ILI9341_YELLOW);
     display.print("Tie!");

@@ -21,5 +21,8 @@ bool check_self_death(Block play_arr[], uint8_t blocks_allowed);
 
 bool check_enemy_death(Block play_arr[], uint8_t blocks_allowed);
 
+// Check if you have lost or your enemy has lost, and set gamestate to 3 if it is
+bool check_deaths(Block play_arr[], int squares_allowed, Game *game);
+
 
 #endif

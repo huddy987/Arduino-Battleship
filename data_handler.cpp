@@ -2,7 +2,8 @@
 #include <SPI.h>             // Library for SPI mode
 #include <Adafruit_ILI9341.h>
 #include <Arduino.h>
-#include "block.h"
+#include "block.h"    // Block class
+#include "game.h"     // Game class
 #include "data_handler.h"
 
 // (*(play_arr + #)) --> this is the block object
@@ -291,7 +292,34 @@ bool check_enemy_death(Block play_arr[], uint8_t blocks_allowed){
 }
 
 
+// Check if you have lost or your enemy has lost, and set gamestate to 3 if it is
+// Updates the game object to the appropriate alive status (using pointers)
+// Returns 0 or 1 so we can either continue in the loop or not
+// https://stackoverflow.com/questions/8095078/how-to-modify-a-struct-in-a-function-and-return-to-main
+bool check_deaths(Block play_arr[], int squares_allowed, Game *game){
 
+  // We have tied, skip game screen
+  if (check_self_death(play_arr, squares_allowed) and check_enemy_death(play_arr, squares_allowed)){
+    game->update_is_alive(2);
+    game->update_state(3);
+    return 1;
+  }
+
+  // We have lost, skip to end game screen
+  else if (check_self_death(play_arr, squares_allowed)){
+    game->update_is_alive(0);
+    game->update_state(3);
+    return 1;
+  }
+
+  // We have won, skip to end game screen
+  else if (check_enemy_death(play_arr, squares_allowed)){
+    game->update_is_alive(1);
+    game->update_state(3);
+    return 1;
+  }
+  return 0;
+}
 
 /*
   This function might be extraneous but the logic is here

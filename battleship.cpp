@@ -37,7 +37,7 @@ Client client;
 int BOXSIZE = 40;
 
 // Define how many squares are allowed
-int squares_allowed = 5;
+int squares_allowed = 1;
 
 // Define block
 Block game_arr[] = {Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),
@@ -45,7 +45,7 @@ Block game_arr[] = {Block(),Block(),Block(),Block(),Block(),Block(),Block(),Bloc
     Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),
     Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block()};
 
-void setup() {
+void setup_arduino() {
   init();
   Serial.begin(9600);
   Serial3.begin(9600);
@@ -73,11 +73,6 @@ void main_menu(Adafruit_ILI9341 tft, TSPoint point, int BOXSIZE){
 
   // Draw an empty map
   draw_empty_map(tft, BOXSIZE);
-}
-
-// Handles game set up
-void setup_game(Adafruit_ILI9341 tft, TSPoint point, int BOXSIZE){
-  // TODO
 }
 
 void print_blocks(Block player_array[]){
@@ -115,6 +110,7 @@ void play_game(){
     TSPoint point = get_point(tft, ts);
 
     // If the point doesn't have enough pressure, restart from the top (no press registers)
+    // If we are in the end game message phase (3) continue because we dont need presses anymore
     if (point.z < MINPRESSURE and battleship.get_state() != 3) {
      continue;
     }
@@ -297,30 +293,20 @@ void play_game(){
 
 
         // Check if you have lost or your enemy has lost, and set gamestate to 3 if it is
-
-        // We have tied, skip game screen
-        if (check_self_death(game_arr, squares_allowed) and check_enemy_death(game_arr, squares_allowed)){
-          battleship.update_is_alive(2);
-          battleship.update_state(3);
-          continue;
-        }
-        // We have lost, skip to end game screen
-        else if (check_self_death(game_arr, squares_allowed)){
-          battleship.update_is_alive(0);
-          battleship.update_state(3);
+        if(check_deaths(game_arr, squares_allowed, &battleship)){
           continue;
         }
 
-        // We have won, skip to end game screen
-        else if (check_enemy_death(game_arr, squares_allowed)){
-          battleship.update_is_alive(1);
-          battleship.update_state(3);
-          continue;
-        }
-
-        // Else draw your own map (updated) for 5 seconds
+        // Else draw your own map (updated)
         draw_board_self(tft, BOXSIZE, game_arr);
-        delay(5000);
+
+        // Wait until a touch is registered before continuing
+        while(true){
+          TSPoint p = get_point(tft, ts);
+          if (p.z > MINPRESSURE){
+            break;
+          }
+        }
 
         // Show your opponents map (updated)
         draw_board_enemy(tft, BOXSIZE, game_arr);
@@ -341,6 +327,6 @@ void play_game(){
 }
 
 int main(){
-  setup();
+  setup_arduino();
   play_game();
 }
