@@ -5,7 +5,6 @@
 #include <Adafruit_ILI9341.h> // Controller chip library
 #include "TouchScreen.h"    //Library for TouchScreen
 #include "touch_handler.h"  //touch handler header file
-#include "draw_handler.h" // Draw handler header file
 
 // Get a point if there is enough pressure, and map it to the screen dimensions
 TSPoint get_point(Adafruit_ILI9341 tft, TouchScreen ts){

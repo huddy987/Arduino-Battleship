@@ -2,6 +2,8 @@
 #include <SPI.h>             // Library for SPI mode
 #include <Adafruit_ILI9341.h> // Controller chip library
 #include "TouchScreen.h"    //Library for TouchScreen
+#include "block.h"
+#include "data_handler.h"   // Contains determine_block() function
 
 // Draws outcome (0 is lose, 1 is win, 2 is tie)
 void draw_outcome(Adafruit_ILI9341 display, int win_status){
@@ -134,11 +136,13 @@ void clear_all_selections(Adafruit_ILI9341 display, int BOXSIZE, String block_ar
 5 = enemy's: shot but no boat
 6 = enemy's: shot and there is a boat
 7 = enemy's: full boat sunk
+8 = enemy's: has boat but not shot
 */
 // Draws state-relevent color at given grid position
 void draw_state(Adafruit_ILI9341 display, int BOXSIZE, String grid_pos, int state){
   switch(state){
-    case 0:
+    case 0:   // Case 0 is the same as case 8 for the purpose of drawing
+    case 8:
       draw_at_grid_pos(display, BOXSIZE, grid_pos, ILI9341_BLACK);   // Draws black tile if nothing has happened
       break;
     case 1:   // Case 1 is the same as case 5 for the purpose of drawing
@@ -158,4 +162,22 @@ void draw_state(Adafruit_ILI9341 display, int BOXSIZE, String grid_pos, int stat
       break;
   }
 
+}
+
+// Draws appropriate color at every grid position on our own board
+void draw_board_self(Adafruit_ILI9341 display, int BOXSIZE, Block play_arr[]){
+  draw_empty_map(display, BOXSIZE);
+  for(int i = 0; i < 42; i++){
+    // Draw the state for each self block
+    draw_state(display, BOXSIZE, determine_block(i), play_arr[i].getBlock());
+  }
+}
+
+// Draws appropriate color at every grid position on the enemy's board
+void draw_board_enemy(Adafruit_ILI9341 display, int BOXSIZE, Block play_arr[]){
+  draw_empty_map(display, BOXSIZE);
+  for(int i = 0; i < 42; i++){
+    // Draw the state for each self block
+    draw_state(display, BOXSIZE, determine_block(i), play_arr[i].getEnemy());
+  }
 }

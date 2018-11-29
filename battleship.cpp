@@ -2,12 +2,13 @@
 #include <SPI.h>             // Library for SPI mode
 #include <Adafruit_ILI9341.h> // Controller chip library
 #include "TouchScreen.h"    //Library for TouchScreen
+#include "block.h"
 #include "touch_handler.h"  // touch handler header file
 #include "draw_handler.h" // draw handler header file
 #include "game.h" // game class
 #include "client.h" // client class
 #include "player.h" // Player class
-//#include "data_handler.h"
+#include "data_handler.h" // Block class and data handling functions
 
 
 // These are the four touchscreen analog pins
@@ -37,6 +38,12 @@ int BOXSIZE = 40;
 
 // Define how many squares are allowed
 int squares_allowed = 5;
+
+// Define block
+Block game_arr[] = {Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),
+    Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),
+    Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),
+    Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block()};
 
 void setup() {
   init();
@@ -70,7 +77,25 @@ void main_menu(Adafruit_ILI9341 tft, TSPoint point, int BOXSIZE){
 
 // Handles game set up
 void setup_game(Adafruit_ILI9341 tft, TSPoint point, int BOXSIZE){
+  // TODO
+}
 
+void print_blocks(Block player_array[]){
+  Serial.println("My Block States");
+  for(int i=1; i<43; i++){
+    if ((i%7)==0) {Serial.print((*(player_array + i - 1)).getBlock());Serial.println();}
+    else {Serial.print((*(player_array + i - 1)).getBlock());}
+  }
+  Serial.println();
+}
+
+void print_blocks_2(Block player_array[]){
+  Serial.println("Enemy States");
+  for(int i=1; i<43; i++){
+    if ((i%7)==0) {Serial.print((*(player_array + i - 1)).getEnemy());Serial.println();}
+    else {Serial.print((*(player_array + i - 1)).getEnemy());}
+  }
+  Serial.println();
 }
 
 void play_game(){
@@ -80,16 +105,17 @@ void play_game(){
   // Variables for play and setup phase
   int squares_selected = 0;   // Tracks how many squares are selected in both phases cases 1 and 2
   String selected[squares_allowed] = {};  // Array containing the blocks selected (in "A0" notation)
-  int already_selected;   // Flag that checks if a tile has already been selected
   String *opponent;   // Opponent block array
+  int already_selected = 0;
 
   while(1){
+    already_selected = 0;
 
     // Get a point and map it to the screen dimensions
     TSPoint point = get_point(tft, ts);
 
     // If the point doesn't have enough pressure, restart from the top (no press registers)
-    if (point.z < MINPRESSURE) {
+    if (point.z < MINPRESSURE and battleship.get_state() != 3) {
      continue;
     }
 
@@ -103,8 +129,6 @@ void play_game(){
         break;
 
       case 1:
-        already_selected = 0;
-
         // If cancel is pressed, reset everything
         if(get_confirm_or_cancel(point) == 2){  // If cancel is pressed
           squares_selected = 0; // Reset the squares selected counter to 0
@@ -115,7 +139,7 @@ void play_game(){
           continue; // Restart the loop
         }
         // If confirm is pressed before all tiles are selected, ignore the press
-        if(get_confirm_or_cancel(point) == 1 and squares_selected < 5){
+        if(get_confirm_or_cancel(point) == 1 and squares_selected < squares_allowed){
           continue;
         }
 
@@ -131,7 +155,6 @@ void play_game(){
             already_selected = 1;
           }
         }
-        // If flag is 1, restart the loop (delay to reduce accidental touches)
         if (already_selected == 1){
           delay(200);
           continue;
@@ -172,7 +195,14 @@ void play_game(){
         // Receive opponent selected tiles
         opponent = client.receive_ships(squares_allowed);
 
-        // Update player class to include opponent array TODO
+        // Update own blocks and enemy blocks
+        for(int i = 0; i < squares_allowed; i++){
+          // Sets all your own blocks to hidden but not shot
+          game_arr[determine_array_element(selected[i])].updateBlock(2);
+
+          // Sets all your enemy's blocks to hidden but not shot
+          game_arr[determine_array_element(opponent[i])].updateEnemy(8);
+        }
 
         // If we make it down here, it means both arduinos have selected their tiles
         // So we should update the gamestate
@@ -181,17 +211,15 @@ void play_game(){
         // Draw an empty map
         draw_empty_map(tft, BOXSIZE);
 
-        // Reset already_selected to 0 so we can use it in the next phase
-        already_selected = 0;
+        // Reset our variables to 0 so we can reuse them in the next phase.
         squares_selected = 0; // Reset the squares selected counter to 0
         for(int i = 0; i < squares_allowed; i++){ // Replace selected squares in player's own array with 0
           selected[i] = "";
+          opponent[i] = ""; // Remove the entry from the opponent's list
         }
         break;
 
       case 2:
-        // Show green confirm button once a grid pos is pressed
-        already_selected = 0;
 
         // If cancel is pressed, reset everything
         if(get_confirm_or_cancel(point) == 2){  // If cancel is pressed
@@ -213,10 +241,6 @@ void play_game(){
           draw_grey_confirm(tft, BOXSIZE);  // Draw a grey confirm button in case all were selected
           squares_selected--; // Reduce the counter by 1
           selected[0] = "";  // Remove the entry from our list
-          already_selected = 1;
-        }
-        // If flag is 1, restart the loop (delay to reduce accidental touches)
-        if (already_selected == 1){
           delay(200);
           continue;
         }
@@ -246,24 +270,71 @@ void play_game(){
         // Change menu to confirm button once all tiles are selected
         draw_green_confirm(tft, BOXSIZE);
 
+        // Send "I am ready!" message to other arduino
+        client.send_ready_message();
+
         // Wait for other arduino
+        client.wait(tft);
 
-        // Update enemy map from your selection, and your own map from data received over serial3
+        // Send own selected tile to opponent
+        client.send_ships(selected, 1);
 
-        // Check if you have lost
+        delay(200);  // Small delay so that all the serial data can be sent
 
-        // Wait for your opponent to tell you if they lost
+        // Receive a single block from opponent
+        opponent = client.receive_ships(1);
 
-        // If your opponent lost, set gamestate to 3, game is over
+        // Update enemy blocks with what you selected
+        game_arr[determine_array_element(selected[0])].updateEnemy(update_my_array(game_arr, determine_array_element(selected[0])));
+
+        // Update your own block with what your enemy shot
+        game_arr[determine_array_element(opponent[0])].updateBlock(recieve_turn(game_arr, determine_array_element(opponent[0])));
+        // Debugging stuff
+        print_blocks_2(game_arr);
+        delay(200);
+        print_blocks(game_arr);
+        delay(200);
+
+
+        // Check if you have lost or your enemy has lost, and set gamestate to 3 if it is
+
+        // We have tied, skip game screen
+        if (check_self_death(game_arr, squares_allowed) and check_enemy_death(game_arr, squares_allowed)){
+          battleship.update_is_alive(2);
+          battleship.update_state(3);
+          continue;
+        }
+        // We have lost, skip to end game screen
+        else if (check_self_death(game_arr, squares_allowed)){
+          battleship.update_is_alive(0);
+          battleship.update_state(3);
+          continue;
+        }
+
+        // We have won, skip to end game screen
+        else if (check_enemy_death(game_arr, squares_allowed)){
+          battleship.update_is_alive(1);
+          battleship.update_state(3);
+          continue;
+        }
 
         // Else draw your own map (updated) for 5 seconds
+        draw_board_self(tft, BOXSIZE, game_arr);
+        delay(5000);
 
         // Show your opponents map (updated)
+        draw_board_enemy(tft, BOXSIZE, game_arr);
+
+        // Reset our variables to 0 so we can reuse them in the next loop
+        squares_selected = 0; // Reset the squares selected counter to 0
+        selected[0] = "";
+        opponent[0] = ""; // Remove the entry from the opponent's list
         break;
 
       case 3:
         // Draws outcome based off of what the alive status is
         draw_outcome(tft, battleship.get_is_alive());
+        delay(50000);     // Delay forever
         break;
     }
   }

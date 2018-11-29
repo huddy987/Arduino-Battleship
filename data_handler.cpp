@@ -2,6 +2,7 @@
 #include <SPI.h>             // Library for SPI mode
 #include <Adafruit_ILI9341.h>
 #include <Arduino.h>
+#include "block.h"
 #include "data_handler.h"
 
 // (*(play_arr + #)) --> this is the block object
@@ -58,6 +59,7 @@ void setup() {
     5 = enemy's: shot but no boat
     6 = enemy's: shot but yes boat
     7 = enemy's: full boat sunk
+    8 = enemy's: has boat but not shot
   c. the array element will store a pointer to act as tuple.
     i. the first element of the tuple represents the ship id.
     ii. second element stores the block state
@@ -76,18 +78,6 @@ void setup() {
   uint8_t enemy_state - the enemy block state from my POV
 
 */
-Block::Block(){
-      boat_id = 0;
-      block_state = 0;
-      enemy_state = 0;
-}
-
-void Block::updateBoat(uint8_t num){boat_id = num;}
-void Block::updateBlock(uint8_t num){block_state = num;}
-void Block::updateEnemy(uint8_t num){enemy_state = num;}
-uint8_t Block::getBoat(){return boat_id;}
-uint8_t Block::getBlock(){return block_state;}
-uint8_t Block::getEnemy(){return enemy_state;}
 
 /*
   Inverse function of determine_block
@@ -114,11 +104,11 @@ String determine_block(uint8_t block_number) {
 
   uint8_t column;
   for (uint8_t i=0; i<7 ; i++) {
-    if (((block_number+i)%7)==0) {column = i; break;}
+    if (((block_number-i)%7)==0) {column = i; break;}
   }
-  a = String((column + 65));
+  a = String((char(column + 65)));
 
-  if ((0<=block_number)&&(block_number<=7)) {b = "0";}
+  if ((0<=block_number)&&(block_number<=6)) {b = "0";}
   else if ((7<=block_number)&&(block_number<=13)) {b = "1";}
   else if ((14<=block_number)&&(block_number<=20)) {b = "2";}
   else if ((21<=block_number)&&(block_number<=27)) {b = "3";}
@@ -227,94 +217,77 @@ void send_boat_death(Block play_arr[], uint8_t boat_id, uint8_t boat_death){
 
 
 /*
-will check what the state of my block is
-if == 0, send them a 5. This means they shot nothing
-if == 2, check if they sunk an entire boat.
-  if they sunk an entire boat. send_boat_death(...); executes
-  else, send them a 6
 
 Inputs: the player's array
         enemy_block_number - the block that the enemy wants to attack
-Outputs: none.
+Outputs: int, the new state of the block that the enemy shot
 */
-void recieve_turn(Block player_array[], uint8_t enemy_block_number){
-uint8_t boat_id, boat_death;
-  switch ((*(player_array + enemy_block_number)).getBlock()) {
-    case 0 :  // undisturbed --> make it a 1 on my block state
-      // (*(player_array + enemy_block_number)).block_state = 1;
-      (*(player_array + enemy_block_number)).updateBlock(1);
-      // Serial3.write(5); // tell them that shot but no boat;
-      break;
-
-    case 2 :  // boat hidden; not shot
-      // (*(player_array + enemy_block_number)).block_state = 3;
-      (*(player_array + enemy_block_number)).updateBlock(3);
-      boat_id = (*(player_array + enemy_block_number)).getBoat();
-
-      //if all blocks with the same boat has been shot, the if-block will execute
-      if (check_all_boat_sunk(player_array, boat_id)){
-        boat_death = kill_entire_boat(player_array, boat_id);
-        send_boat_death(player_array, boat_id, boat_death);
-
-      } else {Serial3.write(6);}
-      break;
-    default :
-      Serial.print("Error");
-    }
+uint8_t recieve_turn(Block play_arr[], uint8_t boat_block_number){
+  switch (play_arr[boat_block_number].getBlock()){
+    case 0:
+      return 1;
+    case 2:
+    // If all parts of the boat have been hit, mark it as sunk
+    /*
+      if(check_all_boat_sunk(play_arr[], play_arr[boat_block_number.getBoat()])){
+        return 4;   // If all part are hit, return 7
+      }
+      else{
+      }
+      */
+    // Else, mark it as hit but not comletely sunk
+        return 3;   // Else, return 6
+  }
 }
 
 
 
 /*
-this is what happens after I shoot my enemy's blocks
-Enemy will tell me what happened and I will update
-my array accordingly
-
-Switch Case
-  -5: I shot something but it didn't sink
-  -6: I shot a boat but only one block of it, not the whole thing
-  -7: I killed the entire boat.
-      --> this should then recieve the number of blocks that died
-      --> then, in a for-loop, recieve the blocks make them = 7
-
-
 Inputs: the player's array
         my_block_number - the block number that I shot
-Outputs: none.
+Outputs: the new block state of the block that I shot
 */
-void update_my_array(Block play_arr[], uint8_t my_block_number){
-  uint8_t boat_id;
-  uint8_t block_died;
-  uint8_t boat_deaths;
-  uint8_t enemy_response;
+uint8_t update_my_array(Block play_arr[], uint8_t my_block_number){
 
-  // read the enemy's response here
-  // enemy_response = Serial3.read();
+  switch (play_arr[my_block_number].getEnemy()) {
+    case 0:
+      return 5;   // If there's no boat, return 5
 
-  switch (enemy_response) {
-    case 5:
-      // Serial.println("5"); --> for debugging only
-      // (*(play_arr + my_block_number)).enemy_state = 5;
-      (*(play_arr + my_block_number)).updateEnemy(5);
-      break;
-
-    case 6 :
-      // Serial.println("6"); --> for debugging only
-      // (*(play_arr + my_block_number)).enemy_state = 6;
-      (*(play_arr + my_block_number)).updateEnemy(6);
-      break;
-
-    case 7 :
-      // Serial.println("7");  --> for debugging only
-
-      // boat_deaths = Serial3.read();  // --> how many blocks died
-      // for (int i=0;i<boat_deaths;i++){
-        // block_died =  Serial.read();
-        // (*(play_arr + block_died)).enemy_state = 7;
-      break;
-    default :  // should never execute
-      Serial.println("Error in update_my_array");
+    case 8:
+      return 6;  // If there's a boat return 6 (boat has been hit)
   }
+}
+
+/*
+Checks if we have lost, returns 1 if they have
+*/
+bool check_self_death(Block play_arr[], uint8_t blocks_allowed){
+  uint8_t counter = 0;
+  for(int i = 0; i < 42; i++){
+    if(play_arr[i].getBlock() == 3 or play_arr[i].getBlock() == 4){
+        counter++;
+        if(counter == blocks_allowed){
+          return true;
+        }
+    }
+  }
+  return false;
+}
+
+/*
+Checks if enemy has lost, returns 1 if they have
+*/
+bool check_enemy_death(Block play_arr[], uint8_t blocks_allowed){
+  uint8_t counter = 0;
+  for(int i = 0; i < 42; i++){
+    if(play_arr[i].getEnemy() == 6 or play_arr[i].getEnemy() == 7){
+        counter++;
+        if(counter == blocks_allowed){
+          return true;
+        }
+    }
+  }
+  return false;
 }
 
 
