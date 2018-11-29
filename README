@@ -1,5 +1,6 @@
 CURRENT BUGS:
 - Spam dragging your finger in the setup phase may cause counter to become desynchronized from actual selected tiles
+- Possible memory leak, creating new opponent array every time
 
 
 RESOURCES:

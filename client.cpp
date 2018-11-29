@@ -2,6 +2,7 @@
 #include <SPI.h>             // Library for SPI mode
 #include <Adafruit_ILI9341.h> // Controller chip library
 #include "TouchScreen.h"    //Library for TouchScreen
+#include "block.h"
 #include "client.h"
 #include "draw_handler.h"
 
