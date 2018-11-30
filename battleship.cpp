@@ -21,6 +21,7 @@
 #define TFT_CS 10
 #define TFT_DC 9
 
+
 // Define Display
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
 
@@ -37,7 +38,7 @@ Client client;
 int BOXSIZE = 40;
 
 // Define how many squares are allowed
-int squares_allowed = 1;
+int squares_allowed = 5;
 
 // Define block
 Block game_arr[] = {Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),
@@ -47,6 +48,8 @@ Block game_arr[] = {Block(),Block(),Block(),Block(),Block(),Block(),Block(),Bloc
 
 void setup_arduino() {
   init();
+  Serial.flush();   // Ensure there is no garbage in the serial buffer
+  Serial3.flush();  // Ensure there is no garbage in the serial3 buffer
   Serial.begin(9600);
   Serial3.begin(9600);
   Serial.println("Welcome to Battleship!");
@@ -55,6 +58,9 @@ void setup_arduino() {
   // Draw menu
   draw_menu(tft);
 }
+
+// Resets arduino when called
+void(* resetFunc) (void) = 0; // declare reset function at address 0
 
 // Handles main menu functionality
 void main_menu(Adafruit_ILI9341 tft, TSPoint point, int BOXSIZE){
@@ -149,6 +155,7 @@ void play_game(){
             squares_selected--; // Reduce the counter by 1
             selected[i] = "";  // Remove the entry from our list
             already_selected = 1;
+            break;
           }
         }
         if (already_selected == 1){
@@ -297,8 +304,8 @@ void play_game(){
           continue;
         }
 
-        // Else draw your own map (updated)
-        draw_board_self(tft, BOXSIZE, game_arr);
+        // If no one has lost, draw your own map (updated)
+        draw_board_self(tft, BOXSIZE, game_arr, opponent);
 
         // Wait until a touch is registered before continuing
         while(true){
@@ -309,7 +316,8 @@ void play_game(){
         }
 
         // Show your opponents map (updated)
-        draw_board_enemy(tft, BOXSIZE, game_arr);
+        draw_board_enemy(tft, BOXSIZE, game_arr, &selected[0]);
+        delay(1000);
 
         // Reset our variables to 0 so we can reuse them in the next loop
         squares_selected = 0; // Reset the squares selected counter to 0
@@ -320,7 +328,14 @@ void play_game(){
       case 3:
         // Draws outcome based off of what the alive status is
         draw_outcome(tft, battleship.get_is_alive());
-        delay(50000);     // Delay forever
+        // Wait until a touch is registered before resetting the game
+        while(true){
+          TSPoint p = get_point(tft, ts);
+          if (p.z > MINPRESSURE){
+            break;
+          }
+        }
+        resetFunc(); // Resets the arduino
         break;
     }
   }

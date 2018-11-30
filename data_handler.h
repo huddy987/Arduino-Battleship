@@ -24,5 +24,7 @@ bool check_enemy_death(Block play_arr[], uint8_t blocks_allowed);
 // Check if you have lost or your enemy has lost, and set gamestate to 3 if it is
 bool check_deaths(Block play_arr[], int squares_allowed, Game *game);
 
+// Determines block state before it was shot
+int determine_previous_state(Block play_arr[], uint8_t my_block_number);
 
 #endif
