@@ -20,6 +20,7 @@ class Game{
   private:
     int _state;
     int _mode;
+    int _player_isalive;
   public:
     // Object constructor
     Game(int user_state, int game_mode);
@@ -35,6 +36,12 @@ class Game{
 
     // Updates the current game state
     void update_state(int new_state);
+
+    // Updates the player alive status
+    void update_is_alive(int new_status);
+
+    // Returns player alive status
+    int get_is_alive();
 };
 
 #endif
