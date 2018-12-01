@@ -38,7 +38,6 @@ void setup() {
 }
 */
 
-
 /* TODO:
 0. each arduino will have an array from A5 to G0
   >>> element 0 is block A0, element 1 is B0... element 41 is block G5
@@ -122,8 +121,160 @@ String determine_block(uint8_t block_number) {
 }
 
 
-/*   DEBUGGING
-// printing this for debugging
+/*
+  Inputs: String block - A0 to G5
+  Output:  uint8_t number corresponding to where the block is:
+    1. Top row
+    2. Bottom row
+    3. Left column
+    4. Right column
+    5. Centre tile
+
+    Corner tiles will return negative values
+    they have two constraints and will be especially dealt with
+    -1 : top left (35)
+    -2 : top right (41)
+    -3 : bottom left (0)
+    -4 : bottom right (6)
+*/  // haven't checked this function yet
+uint8_t determine_first_block_type(String grid_pos){
+  uint8_t block_number =  determine_array_element(grid_pos);
+
+  if (block_number == 35) {return (-1);}
+  else if (block_number == 41) {return (-2);}
+  else if (block_number == 0) {return (-3);}
+  else if (block_number == 6) {return (-4);}
+
+  if ((36<=block_number)&&(block_number<=40)) {return 1;}  // top row
+  else if ((1<=block_number)&&(block_number<=5)) {return 2;}  // bottom row
+  else if ((block_number%7)==0) {return 3;}  // left column
+  else if (((block_number+1)%7)==0) {return 4;} // right column
+  else {return 5;}
+}
+
+/*
+  Important: Its the second block minus the first one
+  returns true if the block selected is allowed
+
+  Inputs: String grid_pos1 - the first block selected
+          String grid_pos2 - the second block selected
+          block_type - result of determine_first_block_type(1st block selected)
+  Output: 0 - if the block is invalid
+          if valid, returns (block2_number - block1_number)
+*/
+int valid_second_block(String grid_pos1, String grid_pos2) {
+  int first_block_type = determine_first_block_type(grid_pos1);
+  int block1_number =  determine_array_element(grid_pos1);
+  int block2_number =  determine_array_element(grid_pos2);
+  int difference = block2_number - block1_number;  // for use later
+  int return_val = 0;
+
+  switch (first_block_type) {
+
+    // CORNER CASE
+    case -1: // top Left
+      if (difference == 1) {return_val = 1;}  // they selected 36
+      else if (difference == -7) {return_val = -7;}  // they selected 28
+      else {return_val = 0;}   // invalid block
+      break;
+
+    case -2:  // top right
+      if (difference == -1) {return_val = -1;}  // they selected 40
+      else if (difference == -7) {return_val = -7;}  // they selected 34
+      else {return_val = 0;}   // invalid block
+      break;
+
+    case -3:  // bottom left
+      if (difference == 7) {return_val = 7;}  // they selected 7
+      else if (difference == 1) {return_val = 1;}  // they selected 34
+      else {return_val = 0;}   // invalid block
+      break;
+
+    case -4:  // bottom right
+      if (difference == -1) {return_val = -1;}  // they selected 7
+      else if (difference == 7) {return_val = 7;}  // they selected 34
+      else {return_val = 0;}   // invalid block
+      break;
+
+
+    // SIDE CASES
+    case  1:  // top row
+      if (difference == -1) {return_val = -1;}  // go left
+      else if (difference == 1) {return_val = 1;}  // go right
+      else if (difference == -7) {return_val = -7;}  // go down
+      else {return_val = 0;}   // invalid block
+      break;
+
+    case  2:  // bottom row
+      if (difference == -1) {return_val = -1;}  // go left
+      else if (difference == 1) {return_val = 1;}  // go right
+      else if (difference == 7) {return_val = 7;}  // go up
+      else {return_val = 0;}   // invalid block
+      break;
+
+    case  3:  // left column
+      if (difference == 1) {return_val = 1;}  // go right
+      else if (difference == 7) {return_val = 7;}  // go up
+      else if (difference == -7) {return_val = -7;}  // go up
+      else {return_val = 0;}   // invalid block
+      break;
+
+    case  4:  // right column
+      if (difference == -1) {return_val = -1;}  // go right
+      else if (difference == 7) {return_val = 7;}  // go up
+      else if (difference == -7) {return_val = -7;}  // go up
+      else {return_val = 0;}   // invalid block
+      break;
+
+    // CENTRE CASE
+    case  5:  // centre tiles
+      if (difference == -1) {return_val = -1;}  // go left
+      else if (difference == 1) {return_val = 1;}  // go right
+      else if (difference == 7) {return_val = 7;}  // go up
+      else if (difference == -7) {return_val = -7;}  // go up
+      else {return_val = 0;}   // invalid block
+      break;
+  }
+  return return_val;
+}
+
+/*
+  Important: Its the second block minus the first one
+  returns true if the block selected is allowed
+
+  Inputs: String grids[] - maybe the array of
+          String grid_pos - the block selected
+          block_type - result of valid_second_block
+  Output: false - invalid block
+          true  - valid block
+*/   // make a class later
+bool valid_third_block(String grid_pos1, String grid_pos2, String grid_pos3, uint8_t block_type) {
+  uint8_t block1_number =  determine_array_element(grid_pos1);
+  uint8_t block2_number =  determine_array_element(grid_pos2);
+  uint8_t block3_number =  determine_array_element(grid_pos3);
+
+  // Iterate over every block that was entered: Clean up later.
+  uint8_t difference1 = block3_number - block1_number;  // for use later
+  uint8_t difference2 = block3_number - block2_number;
+
+  // if block type = +/- 7 ==> there should be atleast one that's  +/- 7
+  if (block_type == 7 or block_type == -7) {
+    if (difference1 == 7 or difference1 == -7 or difference2 == 7 or difference2 == -7) {
+      return true;
+    } else {return false;}
+
+  // if block type = +/- 1 ==> there should be atleast one that's  +/- 1
+  } else if (block_type == 1 or block_type == -1){
+    if (difference1 == 1 or difference1 == -1 or difference2 == 1 or difference2 == -1) {
+      return true;
+    } else {return false;}
+  }
+}
+
+/*
+  This following two function shows the game on serial-mon
+  This one print's the player's own blocks
+*/
 void print_blocks(Block player_array[]){
   Serial.println("My Block States");
   for(int i=1; i<43; i++){
@@ -133,16 +284,18 @@ void print_blocks(Block player_array[]){
   Serial.println();
 }
 
-// printing for debugging
-void print_boats(Block player_array[]){
-  Serial.println("My Enemy States");
+/*
+  This function shows the game on serial-mon
+  This one print's the player's enemy states
+*/
+void print_blocks_2(Block player_array[]){
+  Serial.println("Enemy States");
   for(int i=1; i<43; i++){
     if ((i%7)==0) {Serial.print((*(player_array + i - 1)).getEnemy());Serial.println();}
     else {Serial.print((*(player_array + i - 1)).getEnemy());}
   }
   Serial.println();
 }
-*/
 
 
 

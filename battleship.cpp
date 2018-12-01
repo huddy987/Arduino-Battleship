@@ -82,24 +82,6 @@ void main_menu(Adafruit_ILI9341 tft, TSPoint point, int BOXSIZE){
   draw_empty_map(tft, BOXSIZE);
 }
 
-void print_blocks(Block player_array[]){
-  Serial.println("My Block States");
-  for(int i=1; i<43; i++){
-    if ((i%7)==0) {Serial.print((*(player_array + i - 1)).getBlock());Serial.println();}
-    else {Serial.print((*(player_array + i - 1)).getBlock());}
-  }
-  Serial.println();
-}
-
-void print_blocks_2(Block player_array[]){
-  Serial.println("Enemy States");
-  for(int i=1; i<43; i++){
-    if ((i%7)==0) {Serial.print((*(player_array + i - 1)).getEnemy());Serial.println();}
-    else {Serial.print((*(player_array + i - 1)).getEnemy());}
-  }
-  Serial.println();
-}
-
 void play_game(){
   // Calibrate minimum pressure to be considered a touch
   #define MINPRESSURE 10
