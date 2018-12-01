@@ -60,6 +60,7 @@ void setup_arduino() {
 }
 
 // Resets arduino when called
+// https://www.instructables.com/id/two-ways-to-reset-arduino-in-software/
 void(* resetFunc) (void) = 0; // declare reset function at address 0
 
 // Handles main menu functionality
@@ -140,7 +141,7 @@ void play_game(){
           }
           continue; // Restart the loop
         }
-        // If confirm is pressed before all tiles are selected, ignore the press
+        // If confirm is pressed and not all tiles are selected, ignore the press
         if(get_confirm_or_cancel(point) == 1 and squares_selected < squares_allowed){
           continue;
         }
@@ -301,19 +302,14 @@ void play_game(){
 
         // Check if you have lost or your enemy has lost, and set gamestate to 3 if it is
         if(check_deaths(game_arr, squares_allowed, &battleship)){
-          continue;
+          continue;   // If someone died, restart the loop
         }
 
         // If no one has lost, draw your own map (updated)
         draw_board_self(tft, BOXSIZE, game_arr, opponent);
 
         // Wait until a touch is registered before continuing
-        while(true){
-          TSPoint p = get_point(tft, ts);
-          if (p.z > MINPRESSURE){
-            break;
-          }
-        }
+        wait_for_touch(tft, ts, MINPRESSURE);
 
         // Show your opponents map (updated)
         draw_board_enemy(tft, BOXSIZE, game_arr, &selected[0]);
@@ -329,12 +325,7 @@ void play_game(){
         // Draws outcome based off of what the alive status is
         draw_outcome(tft, battleship.get_is_alive());
         // Wait until a touch is registered before resetting the game
-        while(true){
-          TSPoint p = get_point(tft, ts);
-          if (p.z > MINPRESSURE){
-            break;
-          }
-        }
+        wait_for_touch(tft, ts, MINPRESSURE);
         resetFunc(); // Resets the arduino
         break;
     }
