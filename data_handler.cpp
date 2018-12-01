@@ -38,6 +38,7 @@ void setup() {
 }
 */
 
+
 /* TODO:
 0. each arduino will have an array from A5 to G0
   >>> element 0 is block A0, element 1 is B0... element 41 is block G5
@@ -121,22 +122,6 @@ String determine_block(uint8_t block_number) {
 }
 
 
-/*
-  Inputs: String block - A0 to G5
-  Output:  uint8_t number corresponding to where the block is:
-    1. Top row
-    2. Bottom row
-    3. Left column
-    4. Right column
-    5. Centre tile
-
-    Corner tiles will return negative values
-    they have two constraints and will be especially dealt with
-    -1 : top left (35)
-    -2 : top right (41)
-    -3 : bottom left (0)
-    -4 : bottom right (6)
-*/  // haven't checked this function yet
 uint8_t determine_first_block_type(String grid_pos){
   uint8_t block_number =  determine_array_element(grid_pos);
 
@@ -296,6 +281,29 @@ void print_blocks_2(Block player_array[]){
   }
   Serial.println();
 }
+
+
+/*   DEBUGGING
+// printing this for debugging
+void print_blocks(Block player_array[]){
+  Serial.println("My Block States");
+  for(int i=1; i<43; i++){
+    if ((i%7)==0) {Serial.print((*(player_array + i - 1)).getBlock());Serial.println();}
+    else {Serial.print((*(player_array + i - 1)).getBlock());}
+  }
+  Serial.println();
+}
+
+// printing for debugging
+void print_boats(Block player_array[]){
+  Serial.println("My Enemy States");
+  for(int i=1; i<43; i++){
+    if ((i%7)==0) {Serial.print((*(player_array + i - 1)).getEnemy());Serial.println();}
+    else {Serial.print((*(player_array + i - 1)).getEnemy());}
+  }
+  Serial.println();
+}
+*/
 
 
 
@@ -472,6 +480,16 @@ bool check_deaths(Block play_arr[], int squares_allowed, Game *game){
     return 1;
   }
   return 0;
+}
+
+// Determines block state before it was shot
+int determine_previous_state(Block play_arr[], uint8_t boat_block_number){
+  switch (play_arr[boat_block_number].getBlock()){
+    case 1:   // If it was a miss, return the undisturbed case
+      return 0;
+    case 3:
+        return 2;   // If it was hit, return the not-hit state
+  }
 }
 
 /*

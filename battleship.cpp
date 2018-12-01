@@ -21,6 +21,7 @@
 #define TFT_CS 10
 #define TFT_DC 9
 
+
 // Define Display
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
 
@@ -37,7 +38,7 @@ Client client;
 int BOXSIZE = 40;
 
 // Define how many squares are allowed
-int squares_allowed = 1;
+int squares_allowed = 5;
 
 // Define block
 Block game_arr[] = {Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),
@@ -47,6 +48,8 @@ Block game_arr[] = {Block(),Block(),Block(),Block(),Block(),Block(),Block(),Bloc
 
 void setup_arduino() {
   init();
+  Serial.flush();   // Ensure there is no garbage in the serial buffer
+  Serial3.flush();  // Ensure there is no garbage in the serial3 buffer
   Serial.begin(9600);
   Serial3.begin(9600);
   Serial.println("Welcome to Battleship!");
@@ -55,6 +58,10 @@ void setup_arduino() {
   // Draw menu
   draw_menu(tft);
 }
+
+// Resets arduino when called
+// https://www.instructables.com/id/two-ways-to-reset-arduino-in-software/
+void(* resetFunc) (void) = 0; // declare reset function at address 0
 
 // Handles main menu functionality
 void main_menu(Adafruit_ILI9341 tft, TSPoint point, int BOXSIZE){
@@ -74,6 +81,26 @@ void main_menu(Adafruit_ILI9341 tft, TSPoint point, int BOXSIZE){
   // Draw an empty map
   draw_empty_map(tft, BOXSIZE);
 }
+
+/*
+void print_blocks(Block player_array[]){
+  Serial.println("My Block States");
+  for(int i=1; i<43; i++){
+    if ((i%7)==0) {Serial.print((*(player_array + i - 1)).getBlock());Serial.println();}
+    else {Serial.print((*(player_array + i - 1)).getBlock());}
+  }
+  Serial.println();
+}
+
+void print_blocks_2(Block player_array[]){
+  Serial.println("Enemy States");
+  for(int i=1; i<43; i++){
+    if ((i%7)==0) {Serial.print((*(player_array + i - 1)).getEnemy());Serial.println();}
+    else {Serial.print((*(player_array + i - 1)).getEnemy());}
+  }
+  Serial.println();
+}
+*/
 
 void play_game(){
   // Calibrate minimum pressure to be considered a touch
@@ -116,7 +143,7 @@ void play_game(){
           }
           continue; // Restart the loop
         }
-        // If confirm is pressed before all tiles are selected, ignore the press
+        // If confirm is pressed and not all tiles are selected, ignore the press
         if(get_confirm_or_cancel(point) == 1 and squares_selected < squares_allowed){
           continue;
         }
@@ -131,6 +158,7 @@ void play_game(){
             squares_selected--; // Reduce the counter by 1
             selected[i] = "";  // Remove the entry from our list
             already_selected = 1;
+            break;
           }
         }
         if (already_selected == 1){
@@ -276,22 +304,18 @@ void play_game(){
 
         // Check if you have lost or your enemy has lost, and set gamestate to 3 if it is
         if(check_deaths(game_arr, squares_allowed, &battleship)){
-          continue;
+          continue;   // If someone died, restart the loop
         }
 
-        // Else draw your own map (updated)
-        draw_board_self(tft, BOXSIZE, game_arr);
+        // If no one has lost, draw your own map (updated)
+        draw_board_self(tft, BOXSIZE, game_arr, opponent);
 
         // Wait until a touch is registered before continuing
-        while(true){
-          TSPoint p = get_point(tft, ts);
-          if (p.z > MINPRESSURE){
-            break;
-          }
-        }
+        wait_for_touch(tft, ts, MINPRESSURE);
 
         // Show your opponents map (updated)
-        draw_board_enemy(tft, BOXSIZE, game_arr);
+        draw_board_enemy(tft, BOXSIZE, game_arr, &selected[0]);
+        delay(1000);
 
         // Reset our variables to 0 so we can reuse them in the next loop
         squares_selected = 0; // Reset the squares selected counter to 0
@@ -302,7 +326,9 @@ void play_game(){
       case 3:
         // Draws outcome based off of what the alive status is
         draw_outcome(tft, battleship.get_is_alive());
-        delay(50000);     // Delay forever
+        // Wait until a touch is registered before resetting the game
+        wait_for_touch(tft, ts, MINPRESSURE);
+        resetFunc(); // Resets the arduino
         break;
     }
   }
