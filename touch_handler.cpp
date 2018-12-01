@@ -6,9 +6,10 @@
 #include "TouchScreen.h"    //Library for TouchScreen
 #include "touch_handler.h"  //touch handler header file
 
-// Get a point if there is enough pressure, and map it to the screen dimensions
+// Get a point, and map it to the screen dimensions
 TSPoint get_point(Adafruit_ILI9341 tft, TouchScreen ts){
   // This is calibration data for the raw touch data to the screen coordinates
+  // Thanks to https://github.com/adafruit/ for the library and this calibration method
   #define TS_MINX 150
   #define TS_MINY 120
   #define TS_MAXX 920
@@ -43,8 +44,7 @@ int get_confirm_or_cancel(TSPoint point){
   return 0;
 }
 
-// Returns the grid position in the for [LETTER][NUMBER] as a string
-
+// Returns the grid position in the [LETTER][NUMBER] notation as a string
 String get_grid_position(TSPoint point, int BOXSIZE){
   // Grid box constants
   char let[7] = {'A', 'B', 'C', 'D', 'E', 'F', 'G'};
@@ -74,4 +74,14 @@ String get_grid_position(TSPoint point, int BOXSIZE){
     this should only be called in the grid region.
   */
   return "Error";
+}
+
+// Loops continually until a press is registered
+void wait_for_touch(Adafruit_ILI9341 tft, TouchScreen ts, int MINPRESSURE){
+  while(true){
+    TSPoint p = get_point(tft, ts);
+    if (p.z > MINPRESSURE){
+      break;
+    }
+  }
 }

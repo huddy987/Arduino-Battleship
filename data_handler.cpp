@@ -321,6 +321,16 @@ bool check_deaths(Block play_arr[], int squares_allowed, Game *game){
   return 0;
 }
 
+// Determines block state before it was shot
+int determine_previous_state(Block play_arr[], uint8_t boat_block_number){
+  switch (play_arr[boat_block_number].getBlock()){
+    case 1:   // If it was a miss, return the undisturbed case
+      return 0;
+    case 3:
+        return 2;   // If it was hit, return the not-hit state
+  }
+}
+
 /*
   This function might be extraneous but the logic is here
 

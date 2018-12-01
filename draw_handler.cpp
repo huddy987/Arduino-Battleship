@@ -35,8 +35,25 @@ void draw_outcome(Adafruit_ILI9341 display, int win_status){
   }
 }
 
-// Draw menu for # of players selection
+// Draws a main menu
 void draw_menu(Adafruit_ILI9341 display){
+  // Need to do this to rotate text
+  display.setRotation(1);
+
+  // Fill screen with blue
+  display.fillScreen(ILI9341_BLUE);
+
+  // Set text size and color
+  display.setTextColor(ILI9341_WHITE);
+  display.setTextSize(10);
+
+  display.setCursor(20, 85);
+  display.print("PLAY!");
+}
+
+// Draw menu for # of players selection
+// Unused, will be useful if we decide to implement an AI later
+void draw_menu_mode(Adafruit_ILI9341 display){
   int char_size = 10;
   // Need to do this to rotate text
   display.setRotation(1);
@@ -161,26 +178,66 @@ void draw_state(Adafruit_ILI9341 display, int BOXSIZE, String grid_pos, int stat
       break;
     case 6:  // Case 6 is the same as case 7 for the purpose of drawing
     case 7:
-      draw_at_grid_pos(display, BOXSIZE, grid_pos, ILI9341_GREEN);   // Draws green tile if the enemy boat was hit
+      draw_at_grid_pos(display, BOXSIZE, grid_pos, ILI9341_RED);   // Draws red tile if the enemy boat was hit
       break;
   }
+}
 
+// Blinks a selected grid position a given amount of times
+// mode 0: show my enemy's shot on my board
+// mode 1: show my shot on my enemy's board
+void blink_block(Adafruit_ILI9341 display, int BOXSIZE, Block play_arr[], String *grid_pos, int blink_times, int mode){
+  int block_number = determine_array_element(*grid_pos);  // Converts grid position to grid number
+   int previous_state = determine_previous_state(play_arr, block_number);  // Determine the state before it was shot
+
+  for(int i = 0; i < blink_times; i++){
+    if(mode == 0){
+      delay(500); // Half second delay between transitions
+      draw_state(display, BOXSIZE, *grid_pos, previous_state);
+      delay(500);
+      draw_state(display, BOXSIZE, *grid_pos, play_arr[block_number].getBlock());
+    }
+    else if(mode == 1){
+      delay(500); // Half second delay between transitions
+      draw_at_grid_pos(display, BOXSIZE, *grid_pos, ILI9341_BLACK);
+      delay(500);
+      draw_state(display, BOXSIZE, *grid_pos, play_arr[block_number].getEnemy());
+    }
+  }
+}
+
+// Draws the message "opponent" vertically on the left side of the screen
+void draw_opponent_message(Adafruit_ILI9341 display){
+  // Set text size and color
+  display.setTextColor(ILI9341_WHITE);
+  display.setTextSize(2);
+
+  display.setCursor(30, 13);
+  display.print("OPPONENT'S SHOT");
 }
 
 // Draws appropriate color at every grid position on our own board
-void draw_board_self(Adafruit_ILI9341 display, int BOXSIZE, Block play_arr[]){
-  draw_empty_map(display, BOXSIZE);
+void draw_board_self(Adafruit_ILI9341 display, int BOXSIZE, Block play_arr[], String *opponent_selection){
+  // Need to do this to rotate to standard game rotations as specified in readme (after main menu).
+  display.setRotation(0);
+  draw_empty_grid(display, BOXSIZE);
   for(int i = 0; i < 42; i++){
     // Draw the state for each self block
     draw_state(display, BOXSIZE, determine_block(i), play_arr[i].getBlock());
   }
+  // Draw the word "opponent" to know that it's our opponent's shot
+  draw_opponent_message(display);
+  // Blink the last the opponent shot block 3 times
+  blink_block(display, BOXSIZE, play_arr, opponent_selection, 3, 0);
 }
 
 // Draws appropriate color at every grid position on the enemy's board
-void draw_board_enemy(Adafruit_ILI9341 display, int BOXSIZE, Block play_arr[]){
+void draw_board_enemy(Adafruit_ILI9341 display, int BOXSIZE, Block play_arr[], String *my_selection){
   draw_empty_map(display, BOXSIZE);
   for(int i = 0; i < 42; i++){
     // Draw the state for each self block
     draw_state(display, BOXSIZE, determine_block(i), play_arr[i].getEnemy());
   }
+  // Blink the last block I shot 3 times
+  blink_block(display, BOXSIZE, play_arr, my_selection, 3, 1);
 }
