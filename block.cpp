@@ -10,11 +10,15 @@ Block::Block(){
       boat_id = 0;
       block_state = 0;
       enemy_state = 0;
+      enemy_boat_id = 0;
 }
 
 void Block::updateBoat(uint8_t num){boat_id = num;}
 void Block::updateBlock(uint8_t num){block_state = num;}
 void Block::updateEnemy(uint8_t num){enemy_state = num;}
+void Block::updateEnemyBoat(uint8_t num){enemy_boat_id = num;}
+
 uint8_t Block::getBoat(){return boat_id;}
 uint8_t Block::getBlock(){return block_state;}
 uint8_t Block::getEnemy(){return enemy_state;}
+uint8_t Block::getEnemyBoat(){return enemy_boat_id;}

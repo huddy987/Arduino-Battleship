@@ -5,28 +5,33 @@ uint8_t determine_array_element(String grid_pos);
 
 String determine_block(uint8_t block_number);
 
-uint8_t determine_first_block_type(String grid_pos);
-
-int valid_second_block(String grid_pos1, String grid_pos2);
-
-bool valid_third_block(String grid_pos1, String grid_pos2, String grid_pos3, uint8_t block_type);
-
 void print_blocks(Block player_array[]);
 
 void print_blocks_2(Block player_array[]);
 
+void print_blocks_3(Block player_array[]);
 
-bool check_all_boat_sunk(Block play_arr[], uint8_t boat_id);
+void print_blocks_4(Block player_array[]);
 
-uint8_t kill_entire_boat(Block play_arr[], uint8_t boat_id);
+// bool check_all_boat_sunk(Block play_arr[]);
 
-void send_boat_death(Block play_arr[], uint8_t boat_id, uint8_t boat_death);
+// uint8_t kill_entire_boat(Block play_arr[], uint8_t boat_id);
+
+// void send_boat_death(Block play_arr[], uint8_t boat_id, uint8_t boat_death);
+
+
+bool check_my_boat_sunk(Block play_arr[], uint8_t boat_id);
+void kill_my_boat(Block play_arr[], uint8_t boat_id);
+void check_if_my_boat_sunk(Block play_arr[]);
 
 uint8_t recieve_turn(Block play_arr[], uint8_t boat_block_number);
 
+bool check_enemy_boat_sunk(Block play_arr[], uint8_t boat_id);
+void kill_enemy_boat(Block play_arr[], uint8_t boat_id);
+void check_if_enemy_boat_sunk(Block play_arr[]);
+
 uint8_t update_my_array(Block play_arr[], uint8_t my_block_number);
 
-void making_a_turn(String grid_pos, Block player_array[]);
 
 bool check_self_death(Block play_arr[], uint8_t blocks_allowed);
 

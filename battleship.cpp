@@ -9,6 +9,7 @@
 #include "client.h" // client class
 #include "player.h" // Player class
 #include "data_handler.h" // Block class and data handling functions
+#include "boat_id.h"
 
 
 // These are the four touchscreen analog pins
@@ -38,7 +39,7 @@ Client client;
 int BOXSIZE = 40;
 
 // Define how many squares are allowed
-int squares_allowed = 5;
+int squares_allowed = 12;
 
 // Define block
 Block game_arr[] = {Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),
@@ -111,6 +112,7 @@ void play_game(){
   String selected[squares_allowed] = {};  // Array containing the blocks selected (in "A0" notation)
   String *opponent;   // Opponent block array
   int already_selected = 0;
+  int block_is_allowed = 0;   // used for checking if block is valid input
 
   while(1){
     already_selected = 0;
@@ -136,13 +138,14 @@ void play_game(){
       case 1:
         // If cancel is pressed, reset everything
         if(get_confirm_or_cancel(point) == 2){  // If cancel is pressed
-          squares_selected = 0; // Reset the squares selected counter to 0
+          squares_selected = 0;  // Reset the squares selected counter to 0
           clear_all_selections(tft, BOXSIZE, selected, squares_allowed);  // Draws board in a reset state
           for(int i = 0; i < squares_allowed; i++){ // Replace selected squares in player's own array with 0
             selected[i] = "";
           }
           continue; // Restart the loop
         }
+
         // If confirm is pressed and not all tiles are selected, ignore the press
         if(get_confirm_or_cancel(point) == 1 and squares_selected < squares_allowed){
           continue;
@@ -150,7 +153,6 @@ void play_game(){
 
         // If a block has already been selected, remove it from the list
         for(int i = 0; i < squares_allowed; i++){
-          // If the block has already been selected, remove it from the list.
           if(pos == selected[i]){
             Serial.println(selected[i]);
             draw_at_grid_pos(tft, BOXSIZE, selected[i], ILI9341_BLACK); // Draw black so the user knows we've removed it
@@ -161,17 +163,60 @@ void play_game(){
             break;
           }
         }
+
         if (already_selected == 1){
           delay(200);
           continue;
         }
 
-        // If squares selected is less then the amount of squares allowed, let the player choose another square.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        /*   WORK HERE WORK HERE WORK HERE   */
+        // If squares selected is less than the amount of squares allowed, let the player choose another square.
+        // TODO: WORK INSIDE HERE.
+
         if(squares_selected < squares_allowed){
+
+          // This is where my boy hudson puts the blocks inside the array
           selected[squares_selected] =  pos;  // Store the grid position in our array
-          Serial.println(selected[squares_selected]);
-          draw_at_grid_pos(tft, BOXSIZE, pos, ILI9341_GREEN); // Draw green so the user knows we've registered their press
+
+
+          // Get ready for richmond
           squares_selected++;
+
+          block_is_allowed = first_contact(selected, squares_selected, squares_allowed);
+
+          // Get ready for huddy
+          squares_selected--;
+
+          if (block_is_allowed) {
+            // if block is allowed, 
+            Serial.println(selected[squares_selected]);
+            draw_at_grid_pos(tft, BOXSIZE, pos, ILI9341_GREEN); // Draw green so the user knows we've registered their press
+            squares_selected++;
+          } else {
+            // if block is not allowed remove it
+            selected[squares_selected] =  "";
+          }
+
           //Serial.println(squares_selected);
 
           // Restart loop (need to do it this way to allow deselecting when there are 5 tiles)
@@ -181,7 +226,13 @@ void play_game(){
           }
           delay(200);   //200 ms delay to reduce accidental touches
           continue;
+        
+        } else {
+            // pass the array to a function and input the boat id's
+            input_boat_id(selected, game_arr);
+            print_blocks_3(game_arr);
         }
+
 
         // If confirm is not selected, restart the loop (wait)
         if(!(get_confirm_or_cancel(point) == 1)){
@@ -199,7 +250,12 @@ void play_game(){
         delay(200);  // Small delay so that all the serial data can be sent
 
         // Receive opponent selected tiles
+        // This is a string array of the enemy's ships
         opponent = client.receive_ships(squares_allowed);
+
+        // assigns the boat IDs to my enemy's boat
+        input_enemy_boat_id(opponent, game_arr);
+        print_blocks_4(game_arr);
 
         // Update own blocks and enemy blocks
         for(int i = 0; i < squares_allowed; i++){
@@ -295,6 +351,14 @@ void play_game(){
 
         // Update your own block with what your enemy shot
         game_arr[determine_array_element(opponent[0])].updateBlock(recieve_turn(game_arr, determine_array_element(opponent[0])));
+        
+        // do the check for the boats here for enemy and you
+        check_if_enemy_boat_sunk(game_arr);
+        check_if_my_boat_sunk(game_arr);
+
+
+
+
         // Debugging stuff
         print_blocks_2(game_arr);
         delay(200);
