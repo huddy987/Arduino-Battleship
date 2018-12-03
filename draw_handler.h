@@ -49,5 +49,7 @@ void draw_board_self(Adafruit_ILI9341 display, int BOXSIZE, Block play_arr[], St
 // Draws appropriate color at every grid position on the enemy's board
 void draw_board_enemy(Adafruit_ILI9341 display, int BOXSIZE, Block play_arr[], String *my_selection);
 
+void draw_select(Adafruit_ILI9341 display, int BOXSIZE, String message);
+void draw_grey_setup(Adafruit_ILI9341 display, int BOXSIZE, int squares_selected);
 
 #endif
