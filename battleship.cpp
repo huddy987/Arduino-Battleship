@@ -81,6 +81,7 @@ void main_menu(Adafruit_ILI9341 tft, TSPoint point, int BOXSIZE){
 
   // Draw an empty map
   draw_empty_map(tft, BOXSIZE);
+  draw_select(tft, BOXSIZE, "5");
 }
 
 /*
@@ -136,6 +137,7 @@ void play_game(){
         break;
 
       case 1:
+
         // If cancel is pressed, reset everything
         if(get_confirm_or_cancel(point) == 2){  // If cancel is pressed
           squares_selected = 0;  // Reset the squares selected counter to 0
@@ -143,8 +145,11 @@ void play_game(){
           for(int i = 0; i < squares_allowed; i++){ // Replace selected squares in player's own array with 0
             selected[i] = "";
           }
+          draw_grey_setup(tft, BOXSIZE, squares_selected);
           continue; // Restart the loop
         }
+
+        draw_grey_setup(tft, BOXSIZE, squares_selected);
 
         // If confirm is pressed and not all tiles are selected, ignore the press
         if(get_confirm_or_cancel(point) == 1 and squares_selected < squares_allowed){
@@ -156,7 +161,8 @@ void play_game(){
           if(pos == selected[i]){
             Serial.println(selected[i]);
             draw_at_grid_pos(tft, BOXSIZE, selected[i], ILI9341_BLACK); // Draw black so the user knows we've removed it
-            draw_grey_confirm(tft, BOXSIZE);  // Draw a grey confirm button in case all were selected
+            // draw_grey_confirm(tft, BOXSIZE);  // Draw a grey confirm button in case all were selected
+            draw_grey_setup(tft, BOXSIZE, squares_selected);
             squares_selected--; // Reduce the counter by 1
             selected[i] = "";  // Remove the entry from our list
             already_selected = 1;

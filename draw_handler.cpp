@@ -172,11 +172,14 @@ void draw_state(Adafruit_ILI9341 display, int BOXSIZE, String grid_pos, int stat
     case 2:
       draw_at_grid_pos(display, BOXSIZE, grid_pos, 0x8410);   // Draws grey tile if own boat is still hidden
       break;
-    case 3:  // Case 3 is the same as case 4 for the purpose of drawing
     case 4:
       draw_at_grid_pos(display, BOXSIZE, grid_pos, ILI9341_RED);   // Draws red tile if your own boat was hit
       break;
+    case 3:
     case 6:  // Case 6 is the same as case 7 for the purpose of drawing
+      // Magenta
+      draw_at_grid_pos(display, BOXSIZE, grid_pos, 0xFD20);   // Draws red tile if your own boat was hit
+      break;
     case 7:
       draw_at_grid_pos(display, BOXSIZE, grid_pos, ILI9341_RED);   // Draws red tile if the enemy boat was hit
       break;
@@ -240,4 +243,22 @@ void draw_board_enemy(Adafruit_ILI9341 display, int BOXSIZE, Block play_arr[], S
   }
   // Blink the last block I shot 3 times
   blink_block(display, BOXSIZE, play_arr, my_selection, 3, 1);
+}
+
+void draw_select(Adafruit_ILI9341 display, int BOXSIZE, String message){
+  display.fillRect(120, 0, 120, BOXSIZE, 0x8410);
+  display.setTextColor(ILI9341_WHITE);
+  display.setTextSize(2);
+  display.setCursor(132, 13);
+  display.print("SELECT " + message);
+}
+
+void draw_grey_setup(Adafruit_ILI9341 display, int BOXSIZE, int block_number){
+  String message = "";
+  if ((0<=block_number)&&(block_number<=3)) {message = "5";}
+  else if ((4<=block_number)&&(block_number<=7)) {message = "4";}
+  else if ((8<=block_number)&&(block_number<=12)) {message = "3";}
+  else {Serial.println("Error in draw_grey_setup.");}
+
+  draw_select(display, BOXSIZE, message);
 }
