@@ -212,7 +212,7 @@ void kill_my_boat(Block play_arr[], uint8_t boat_id){
   }
 }
 
-/* 
+/*
  * Use in conjuction with check_all_boat_sunk
  * If a boat is dead, make its state == 4
  */
@@ -284,7 +284,7 @@ void kill_enemy_boat(Block play_arr[], uint8_t boat_id){
   }
 }
 
-/* 
+/*
  * Use in conjuction with check_all_boat_sunk
  * If a boat is dead, make its state == 4
  */
@@ -320,7 +320,7 @@ Checks if we have lost, returns 1 if they have
 bool check_self_death(Block play_arr[], uint8_t blocks_allowed){
   uint8_t counter = 0;
   for(int i = 0; i < 42; i++){
-    if(play_arr[i].getBlock() == 3 or play_arr[i].getBlock() == 4){
+    if(play_arr[i].getBlock() == 4){    // If all boats are sunk
         counter++;
         if(counter == blocks_allowed){
           return true;
@@ -336,7 +336,7 @@ Checks if enemy has lost, returns 1 if they have
 bool check_enemy_death(Block play_arr[], uint8_t blocks_allowed){
   uint8_t counter = 0;
   for(int i = 0; i < 42; i++){
-    if(play_arr[i].getEnemy() == 6 or play_arr[i].getEnemy() == 7){
+    if(play_arr[i].getEnemy() == 7){   // If all boats are sunk
         counter++;
         if(counter == blocks_allowed){
           return true;
@@ -383,5 +383,7 @@ int determine_previous_state(Block play_arr[], uint8_t boat_block_number){
       return 0;
     case 3:
         return 2;   // If it was hit, return the not-hit state
+    case 4:
+      return 2;     // If boat was fully sunk, return the non-hit state
   }
 }
