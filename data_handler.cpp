@@ -385,4 +385,3 @@ int determine_previous_state(Block play_arr[], uint8_t boat_block_number){
         return 2;   // If it was hit, return the not-hit state
   }
 }
-
