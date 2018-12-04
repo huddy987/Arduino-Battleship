@@ -217,15 +217,15 @@ void blink_block(Adafruit_ILI9341 display, int BOXSIZE, Block play_arr[], String
 
   for(int i = 0; i < blink_times; i++) {
     if(mode == 0){
-      delay(500); // Half second delay between transitions
+      delay(250); // Half second delay between transitions
       draw_state(display, BOXSIZE, *grid_pos, previous_state);
-      delay(500);
+      delay(250);
       draw_state(display, BOXSIZE, *grid_pos, play_arr[block_number].getBlock());
 
     } else if(mode == 1) {
-      delay(500); // Half second delay between transitions
+      delay(250); // Half second delay between transitions
       draw_at_grid_pos(display, BOXSIZE, *grid_pos, ILI9341_BLACK);
-      delay(500);
+      delay(250);
       draw_state(display, BOXSIZE, *grid_pos, play_arr[block_number].getEnemy());
     }
   }
@@ -263,8 +263,8 @@ void draw_board_enemy(Adafruit_ILI9341 display, int BOXSIZE, Block play_arr[], S
     // Draw the state for each self block
     draw_state(display, BOXSIZE, determine_block(i), play_arr[i].getEnemy());
   }
-  // Blink the last block I shot 2 times
-  blink_block(display, BOXSIZE, play_arr, my_selection, 2, 1);
+  // Blink the last block I shot 1 time
+  blink_block(display, BOXSIZE, play_arr, my_selection, 1, 1);
 }
 
 /* 

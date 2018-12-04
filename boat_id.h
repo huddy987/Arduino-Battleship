@@ -7,13 +7,15 @@ int valid_second_block(String grid_pos1, String grid_pos2);
 
 int special_case(int block_numbers[], int cardinal);
 
-int valid_consequent_blocks(String grid_pos[], int squares_selected, int cardinal);
+void print_consequents(int block_numbers[], int differences[], int cardinal, int block_type);
+
+int valid_consequent_blocks(String grid_pos[], int squares_selected, int cardinal, int squares_allowed);
 
 int first_contact(String block_arr[], int squares_selected, int squares_allowed);
 
-void input_boat_id(String selected_array[], Block game_arr[]);
+void input_boat_id(String selected_array[], Block game_arr[], int squares_allowed);
 
-void input_enemy_boat_id(String selected_array[], Block game_arr[]);
+void input_enemy_boat_id(String selected_array[], Block game_arr[], int squares_allowed);
 
 void freeze_boat(String selected_array[], String frozen_boats[],  int squares_selected);
 

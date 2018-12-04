@@ -30,7 +30,7 @@ TSPoint get_point(Adafruit_ILI9341 tft, TouchScreen ts) {
 // Returns: 0 (none), 1 (confirm), 2 (cancel)
 int get_confirm_or_cancel(TSPoint point) {
   // If we are in the menu region
-  if (point.y < 40) {
+  if (point.y < 25) {
     // If we are in the confirm region, return 1
     if (point.x > 120) {
       return 1;
