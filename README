@@ -1,18 +1,5 @@
-CURRENT BUGS:
-- Spam dragging your finger in the setup phase may cause counter to become desynchronized from actual selected tiles
-- Possible memory leak, creating new opponent array every time
-- spam tapping
-
 Fix Later
-- Only allowed to touch states 0 and 8
-- Boat setup: fix the wraparound +/- 1
-- if boat shot but not dead: should be orange
 - when you tap the confirm for boat, have it not flash the select screen
-- flash faster and less time when shooting boats.
-
-Fix Maybe
-- optimize drawing
-
 
 RESOURCES:
 

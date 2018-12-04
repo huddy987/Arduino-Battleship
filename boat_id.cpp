@@ -139,11 +139,11 @@ int valid_third_block(String grid_pos[], int squares_selected) {
   // if block type = +/- 7 ==> there should be atleast one that's  +/-
   if (block_type == -7 or block_type == 7) {
       if (difference1 == -7 or  difference1 == 7 or
-          difference2 == -7 or  difference2 == 7) {return 1;} 
+          difference2 == -7 or  difference2 == 7) {return 1;}
       else {return 0;}
   } else if (block_type == -1 or block_type == 1) {
       if (difference1 == -1 or  difference1 == 1 or
-          difference2 == -1 or  difference2 == 1) {return 1;} 
+          difference2 == -1 or  difference2 == 1) {return 1;}
       else {return 0;}
   }
 }
@@ -172,12 +172,12 @@ int valid_fourth_block(String grid_pos[], int squares_selected) {
   if (block_type == -7 or block_type == 7) {
       if (difference1 == -7 or  difference1 == 7 or
           difference2 == -7 or  difference2 == 7 or
-          difference3 == -7 or  difference3 == 7) {return 1;} 
+          difference3 == -7 or  difference3 == 7) {return 1;}
       else {return 0;}
   } else if (block_type == -1 or block_type == 1) {
       if (difference1 == -1 or  difference1 == 1 or
           difference2 == -1 or  difference2 == 1 or
-          difference3 == -1 or  difference3 == 1) {return 1;} 
+          difference3 == -1 or  difference3 == 1) {return 1;}
       else {return 0;}
   }
 }
@@ -203,13 +203,13 @@ int valid_fifth_block(String grid_pos[], int squares_selected) {
       if (difference1 == -7 or  difference1 == 7 or
           difference2 == -7 or  difference2 == 7 or
           difference3 == -7 or  difference3 == 7 or
-          difference4 == -7 or  difference4 == 7) {return 1;} 
+          difference4 == -7 or  difference4 == 7) {return 1;}
       else {return 0;}
   } else if (block_type == -1 or block_type == 1) {
       if (difference1 == -1 or  difference1 == 1 or
           difference2 == -1 or  difference2 == 1 or
           difference3 == -1 or  difference3 == 1 or
-          difference4 == -1 or  difference4 == 1) {return 1;} 
+          difference4 == -1 or  difference4 == 1) {return 1;}
       else {return 0;}
   }
 }
@@ -226,7 +226,7 @@ int first_contact(String block_arr[], int squares_selected, int squares_allowed)
 
 
 
-  switch (squares_selected) { 
+  switch (squares_selected) {
 
     // first block of the boat
     case 1:
@@ -288,7 +288,7 @@ void input_boat_id(String selected_array[], Block game_arr[]) {
     // third boat
     else if ((9 <= i) && ( i <= 11)) {
       game_arr[determine_array_element(selected_array[i])].updateBoat(3);
-    } 
+    }
 
     // Should never execute
     else {Serial.println("Error in input_boat_id.");}
@@ -313,7 +313,7 @@ void input_enemy_boat_id(String selected_array[], Block game_arr[]) {
     // third boat
     else if ((9 <= i) && ( i <= 11)) {
       game_arr[determine_array_element(selected_array[i])].updateEnemyBoat(3);
-    } 
+    }
 
     // Should never execute
     else {Serial.println("Error in input_boat_id.");}

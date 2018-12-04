@@ -22,6 +22,7 @@ class Game{
     int _mode;
     int _player_isalive;
   public:
+    
     // Object constructor
     Game(int user_state, int game_mode);
 
