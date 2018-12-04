@@ -8,9 +8,16 @@
 #include "game.h"     // Game class
 #include "boat_id.h"
 
+
+/*
+  This function returns the characteristic of the first block of the boat inputter
+  Is used in conjuction with valid_second_block to determine if the 
+  subsequent blocks are valid or not
+*/
 int determine_first_block_type(String grid_pos){
   int block_number =  determine_array_element(grid_pos);
 
+  // These first four if-blocks deal with the corner cases
   if (block_number == 35) {return (-1);}
   else if (block_number == 41) {return (-2);}
   else if (block_number == 0) {return (-3);}
@@ -20,7 +27,7 @@ int determine_first_block_type(String grid_pos){
   else if ((1<=block_number)&&(block_number<=5)) {return 2;}  // bottom row
   else if ((block_number%7)==0) {return 3;}  // left column
   else if (((block_number+1)%7)==0) {return 4;} // right column
-  else {return 5;}
+  else {return 5;} // center row
 }
 
 /*
@@ -42,7 +49,7 @@ int valid_second_block(String grid_pos1, String grid_pos2) {
 
   switch (first_block_type) {
 
-    // CORNER CASE
+    // CORNER CASES: Have to be handles specially due to having two constraints
     case -1: // top Left
       if (difference == 1) {return_val = 1;}  // they selected 36
       else if (difference == -7) {return_val = -7;}  // they selected 28
@@ -109,57 +116,26 @@ int valid_second_block(String grid_pos1, String grid_pos2) {
   return return_val;
 }
 
+
 /*
-  Important: Its the second block minus the first one
-  returns true if the block selected is allowed
-
-  Inputs: String grids[] - maybe the array of
-          String grid_pos - the block selected
-          block_type - result of valid_second_block
-  Output: false - invalid block
-          true  - valid block
-   // make a class later
-int valid_third_block(String grid_pos[], int squares_selected) {
-  // calculate response from one and two here again.
-  int holder1 = 0;
-  if (squares_selected == 8)  {holder1 = 5;}
-  else if (squares_selected == 12)  {holder1 = 9;}
-
-  int block1_number =  determine_array_element(grid_pos[holder1]);
-  int block2_number =  determine_array_element(grid_pos[holder1 + 1]);
-  int block3_number =  determine_array_element(grid_pos[holder1 + 2]);
-  int block_type = valid_second_block(grid_pos[holder1], grid_pos[holder1 + 1]);
-
-  // Iterate over every block that was entered: Clean up later.
-  int difference1 = block3_number - block1_number;  // for use later
-  int difference2 = block3_number - block2_number;
-  // int seven[2] = {7, -7};
-  // int one[2] = {1, -1};
-
-  // if block type = +/- 7 ==> there should be atleast one that's  +/-
-  if (block_type == -7 or block_type == 7) {
-      if (difference1 == -7 or  difference1 == 7 or
-          difference2 == -7 or  difference2 == 7) {return 1;} 
-      else {return 0;}
-  } else if (block_type == -1 or block_type == 1) {
-      if (difference1 == -1 or  difference1 == 1 or
-          difference2 == -1 or  difference2 == 1) {return 1;} 
-      else {return 0;}
-  }
-}
-*/
-
+ * Deals with the special case of the user having the ability to input a boat
+ * by wraping around due the underlying data structure of the game
+ * Problematic Pairs: (35-34, 28-27,14-20,7-6)
+ * will return 0 if the wrap around is not allowed
+ * else 1
+ */
 int special_case(int block_numbers[], int cardinal) {
+  // assumes true at first becuase this is true for most cases
   int return_val = 1;
   int index;
 
-  // for the upper bound wraparound
+  // This part checks for the upper bound wraparound
   for (int i=0; i<(cardinal-1); i++) {
     if (block_numbers[i] % 7 == 0) {index = i; break;}
   }
   if (block_numbers[index] - block_numbers[cardinal-1] == 1) {return 0;}
 
-  // for the lower bound wraparound
+  // checks for the lower bound wraparound
   for (int i=0; i<(cardinal-1); i++) {
     if ( (block_numbers[i] + 1) % 7 == 0) {index = i; break;}
   }
@@ -169,6 +145,10 @@ int special_case(int block_numbers[], int cardinal) {
 }
 
 
+
+// Determines if a block selected by the user is an allowed input or not
+// If yes, return 1 (true)
+// else return 0 (false)
 int valid_consequent_blocks(String grid_pos[], int squares_selected, int cardinal) {
   int holder1 = 0;
   if (squares_selected == 8 or squares_selected == 9)  {holder1 = 5;}
@@ -189,24 +169,27 @@ int valid_consequent_blocks(String grid_pos[], int squares_selected, int cardina
 
   int block_type = valid_second_block(grid_pos[holder1], grid_pos[holder1 + 1]);
 
+  // if +/- 7 is the block type, a difference of 7 with any of the blocks is acceptable
   if (abs(block_type) == 7) {
     for (int i=0; i<(cardinal-1); i++){
-      if (abs(differences[i]) == 7) {Serial.println("We here."); return 1;}
+      if (abs(differences[i]) == 7) {return 1;}
     }
-  } else if (abs(block_type) == 1) {   /// do for special 
+  } else if (abs(block_type) == 1) {
+
+    // if +/- 1 is the block type, a difference of 1 with any of the blocks is acceptable
     for (int i=0; i<(cardinal-1); i++){
       if (abs(differences[i]) == 1) {
-        Serial.println("We here69.");
+
+        // deals with the special cases as mentioned above
         return(special_case(block_numbers, cardinal));}
     }
   }
-  Serial.println("We here2.");
   return 0;
 }
 
+
 /* This function assumes a 12 boat inputs with 5,4,3 blocks in that order */
 int first_contact(String block_arr[], int squares_selected, int squares_allowed){
-  // idk if a switch statement is better here
 
   int holder = 0;
   // this handles block number 1 and two for the three boats
@@ -252,13 +235,14 @@ int first_contact(String block_arr[], int squares_selected, int squares_allowed)
       // return(valid_fifth_block(block_arr, squares_selected));
 
     default:
+      // Should never execute. Here just in case.
       Serial.println("Somethings wrong in first_contact.");
       return 0;
   }
 }
 
 
-// assigns the boat ID's
+// assigns the boat ID's to the user's blocks
 void input_boat_id(String selected_array[], Block game_arr[]) {
 
   // iterate over the array of inputted blocks
@@ -284,6 +268,7 @@ void input_boat_id(String selected_array[], Block game_arr[]) {
   }
 }
 
+// assigns boat id to the enemy's blocks
 void input_enemy_boat_id(String selected_array[], Block game_arr[]) {
 
   // iterate over the array of inputted blocks
@@ -310,35 +295,41 @@ void input_enemy_boat_id(String selected_array[], Block game_arr[]) {
 }
 
 /*  
- *  
+ * This function disables the user from deselecting boats after the first
+ * block of the next boat has been selected. This prohibits messing up the order
+ * If a user want's to reset the inputs, they have to press the red block
  */ 
 void freeze_boat(String selected_array[], String frozen_boats[],  int squares_selected)  {
   
   switch (squares_selected) {
     // first boat has been fully selected
+    // if so, input the boat blocks into a frozen_boats array
+    // any block inside the array is not a valid input
     case 5:
       Serial.println("freeze_boat #1");
       for (int i=0; i<5; i++) {
         frozen_boats[i] = selected_array[i];
-        Serial.println(frozen_boats[i]);
       }
       break;
 
-    // second
+
     case 9:
+      // second boat has been fully selected
+      // append the 2nd boat blocks to the frozen_array
       Serial.println("freeze_boat #2");
       for (int i=5; i<9; i++) {
         frozen_boats[i] = selected_array[i];
-        Serial.println(frozen_boats[i]);
     }
     break;
   }
 }
 
-// if a block has not been frozen, return true
-// if it's been frozen, return false.
+// checks if a block is not frozen (true) or frozen (false)
+// The logic is inversed because it's easier to deal with on battleship.cpp
 bool check_not_frozen(String frozen_boats[], String pos, int squares_allowed) {
+
   // iterate over frozen boats and check if pos is anywhere in it;
+  // if yes, that means the block is frozen. else not frozen
   for (int i=0; i<squares_allowed; i++) {
     if (pos == frozen_boats[i]) {
       Serial.println("block is frozen");

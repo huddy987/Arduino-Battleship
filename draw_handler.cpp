@@ -114,7 +114,7 @@ void draw_green_confirm(Adafruit_ILI9341 display, int BOXSIZE){
 void draw_cancel(Adafruit_ILI9341 display, int BOXSIZE){
   display.fillRect(0, 0, 120, BOXSIZE, ILI9341_RED);
 
-  /*  // displays "RESET" on the red block
+  /*  // displays "RESET" on the red block. Un-comment if you want
   display.setTextColor(ILI9341_WHITE);
   display.setTextSize(2);
   display.setCursor(30, 13);
@@ -168,27 +168,30 @@ void clear_all_selections(Adafruit_ILI9341 display, int BOXSIZE, String block_ar
 // Draws state-relevent color at given grid position
 void draw_state(Adafruit_ILI9341 display, int BOXSIZE, String grid_pos, int state){
   switch(state){
-    case 0:   // Case 0 is the same as case 8 for the purpose of drawing
+    case 0:
     case 8:
-      draw_at_grid_pos(display, BOXSIZE, grid_pos, ILI9341_BLACK);   // Draws black tile if nothing has happened
+       // Case 0 is the same as case 8 for the purpose of drawing
+       // Draws black tile if nothing has happened
+      draw_at_grid_pos(display, BOXSIZE, grid_pos, ILI9341_BLACK);
       break;
-    case 1:   // Case 1 is the same as case 5 for the purpose of drawing
+    case 1:
     case 5:
-      draw_at_grid_pos(display, BOXSIZE, grid_pos, ILI9341_BLUE);   // Draws blue (water) if shot but no boat
+      // Shot but no boat: BLUE
+      draw_at_grid_pos(display, BOXSIZE, grid_pos, ILI9341_BLUE);
       break;
     case 2:
-      draw_at_grid_pos(display, BOXSIZE, grid_pos, 0x8410);   // Draws grey tile if own boat is still hidden
-      break;
-    case 4:
-      draw_at_grid_pos(display, BOXSIZE, grid_pos, ILI9341_RED);   // Draws red tile if your own boat was hit
+      // Your own boat hidden: GREY
+      draw_at_grid_pos(display, BOXSIZE, grid_pos, 0x8410);
       break;
     case 3:
-    case 6:  // Case 6 is the same as case 7 for the purpose of drawing
-      // Magenta
-      draw_at_grid_pos(display, BOXSIZE, grid_pos, 0xFD20);   // Draws red tile if your own boat was hit
+    case 6:
+      // Boat hit but not sunk: ORANGE
+      draw_at_grid_pos(display, BOXSIZE, grid_pos, 0xFD20);
       break;
+    case 4:
     case 7:
-      draw_at_grid_pos(display, BOXSIZE, grid_pos, ILI9341_RED);   // Draws red tile if the enemy boat was hit
+      // All parts of the boat dead: RED
+      draw_at_grid_pos(display, BOXSIZE, grid_pos, ILI9341_RED);
       break;
   }
 }
@@ -252,6 +255,11 @@ void draw_board_enemy(Adafruit_ILI9341 display, int BOXSIZE, Block play_arr[], S
   blink_block(display, BOXSIZE, play_arr, my_selection, 3, 1);
 }
 
+/* 
+ * This function draws the grey block that
+ * tells the user how many blocks to press
+ * SELECT + <a number>
+ */
 void draw_select(Adafruit_ILI9341 display, int BOXSIZE, String message){
   display.fillRect(120, 0, 120, BOXSIZE, 0x8410);
   display.setTextColor(ILI9341_WHITE);
@@ -260,12 +268,26 @@ void draw_select(Adafruit_ILI9341 display, int BOXSIZE, String message){
   display.print("SELECT " + message);
 }
 
+
+/* 
+ * This function determines how many blocks the user should enter
+ * and calls a function to let prompt the user for the boat
+ */
 void draw_grey_setup(Adafruit_ILI9341 display, int BOXSIZE, int block_number){
   String message = "";
+
+  // if the first boat has not been entered fully
   if ((0<=block_number)&&(block_number<=4)) {message = "5";}
+
+  // if the second boat has not been entered fully
   else if ((5<=block_number)&&(block_number<=8)) {message = "4";}
+
+  // if the thrid boat has not been entered fully
   else if ((9<=block_number)&&(block_number<=13)) {message = "3";}
+
+  // This should never execute
   else {Serial.println("Error in draw_grey_setup.");}
 
+  // Calls the function that actually does the drawing
   draw_select(display, BOXSIZE, message);
 }
