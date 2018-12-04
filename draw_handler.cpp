@@ -113,6 +113,13 @@ void draw_green_confirm(Adafruit_ILI9341 display, int BOXSIZE){
 // Draws a red cancel button
 void draw_cancel(Adafruit_ILI9341 display, int BOXSIZE){
   display.fillRect(0, 0, 120, BOXSIZE, ILI9341_RED);
+
+  /*  // displays "RESET" on the red block
+  display.setTextColor(ILI9341_WHITE);
+  display.setTextSize(2);
+  display.setCursor(30, 13);
+  display.print("RESET");
+  */
 }
 
 // Draws an empty battleship map
@@ -255,9 +262,9 @@ void draw_select(Adafruit_ILI9341 display, int BOXSIZE, String message){
 
 void draw_grey_setup(Adafruit_ILI9341 display, int BOXSIZE, int block_number){
   String message = "";
-  if ((0<=block_number)&&(block_number<=3)) {message = "5";}
-  else if ((4<=block_number)&&(block_number<=7)) {message = "4";}
-  else if ((8<=block_number)&&(block_number<=12)) {message = "3";}
+  if ((0<=block_number)&&(block_number<=4)) {message = "5";}
+  else if ((5<=block_number)&&(block_number<=8)) {message = "4";}
+  else if ((9<=block_number)&&(block_number<=13)) {message = "3";}
   else {Serial.println("Error in draw_grey_setup.");}
 
   draw_select(display, BOXSIZE, message);

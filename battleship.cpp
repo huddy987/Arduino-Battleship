@@ -84,25 +84,6 @@ void main_menu(Adafruit_ILI9341 tft, TSPoint point, int BOXSIZE){
   draw_select(tft, BOXSIZE, "5");
 }
 
-/*
-void print_blocks(Block player_array[]){
-  Serial.println("My Block States");
-  for(int i=1; i<43; i++){
-    if ((i%7)==0) {Serial.print((*(player_array + i - 1)).getBlock());Serial.println();}
-    else {Serial.print((*(player_array + i - 1)).getBlock());}
-  }
-  Serial.println();
-}
-
-void print_blocks_2(Block player_array[]){
-  Serial.println("Enemy States");
-  for(int i=1; i<43; i++){
-    if ((i%7)==0) {Serial.print((*(player_array + i - 1)).getEnemy());Serial.println();}
-    else {Serial.print((*(player_array + i - 1)).getEnemy());}
-  }
-  Serial.println();
-}
-*/
 
 void play_game(){
   // Calibrate minimum pressure to be considered a touch
@@ -114,6 +95,7 @@ void play_game(){
   String *opponent;   // Opponent block array
   int already_selected = 0;
   int block_is_allowed = 0;   // used for checking if block is valid input
+  String frozen_boats[squares_allowed] = {};
 
   while(1){
     already_selected = 0;
@@ -137,6 +119,7 @@ void play_game(){
         break;
 
       case 1:
+      // This is the boat setup phase
 
         // If cancel is pressed, reset everything
         if(get_confirm_or_cancel(point) == 2){  // If cancel is pressed
@@ -144,80 +127,67 @@ void play_game(){
           clear_all_selections(tft, BOXSIZE, selected, squares_allowed);  // Draws board in a reset state
           for(int i = 0; i < squares_allowed; i++){ // Replace selected squares in player's own array with 0
             selected[i] = "";
+            frozen_boats[i] = "";
           }
           draw_grey_setup(tft, BOXSIZE, squares_selected);
           continue; // Restart the loop
         }
 
-        draw_grey_setup(tft, BOXSIZE, squares_selected);
+
 
         // If confirm is pressed and not all tiles are selected, ignore the press
         if(get_confirm_or_cancel(point) == 1 and squares_selected < squares_allowed){
           continue;
         }
 
-        // If a block has already been selected, remove it from the list
+        // If a block has already been selected and it's not frozen, remove it from the list
         for(int i = 0; i < squares_allowed; i++){
-          if(pos == selected[i]){
+
+          if(pos == selected[i] and check_not_frozen(frozen_boats, pos, squares_allowed)){
+
             Serial.println(selected[i]);
             draw_at_grid_pos(tft, BOXSIZE, selected[i], ILI9341_BLACK); // Draw black so the user knows we've removed it
-            // draw_grey_confirm(tft, BOXSIZE);  // Draw a grey confirm button in case all were selected
-            draw_grey_setup(tft, BOXSIZE, squares_selected);
             squares_selected--; // Reduce the counter by 1
+
+            Serial.print("squares_selected: ");Serial.println(squares_selected);
+            draw_grey_setup(tft, BOXSIZE, squares_selected);
             selected[i] = "";  // Remove the entry from our list
             already_selected = 1;
             break;
           }
         }
 
+
+
+
+
+
         if (already_selected == 1){
           delay(200);
           continue;
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        /*   WORK HERE WORK HERE WORK HERE   */
         // If squares selected is less than the amount of squares allowed, let the player choose another square.
-        // TODO: WORK INSIDE HERE.
 
         if(squares_selected < squares_allowed){
 
           // This is where my boy hudson puts the blocks inside the array
           selected[squares_selected] =  pos;  // Store the grid position in our array
 
+          block_is_allowed = first_contact(selected, squares_selected + 1, squares_allowed);
 
-          // Get ready for richmond
-          squares_selected++;
-
-          block_is_allowed = first_contact(selected, squares_selected, squares_allowed);
-
-          // Get ready for huddy
-          squares_selected--;
-
-          if (block_is_allowed) {
+          if (block_is_allowed && check_not_frozen(frozen_boats, pos, squares_allowed) ) {
             // if block is allowed, 
             Serial.println(selected[squares_selected]);
             draw_at_grid_pos(tft, BOXSIZE, pos, ILI9341_GREEN); // Draw green so the user knows we've registered their press
+
+            // if the first block of the next boat has been selected, freeze the previous boat
+            freeze_boat(selected, frozen_boats,  squares_selected);
+
             squares_selected++;
+
+            // draw the grey setup tile that says how many blocks the user should enter
+            draw_grey_setup(tft, BOXSIZE, squares_selected);
           } else {
             // if block is not allowed remove it
             selected[squares_selected] =  "";
@@ -285,6 +255,7 @@ void play_game(){
           selected[i] = "";
           opponent[i] = ""; // Remove the entry from the opponent's list
         }
+
         break;
 
       case 2:
