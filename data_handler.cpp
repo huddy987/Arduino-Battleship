@@ -25,33 +25,13 @@
 */
 
 
-/*
-const int gen_pin = 1;
-
-void setup() {
-    init();
-    pinMode(gen_pin, INPUT);
-    Serial.begin(9600);
-    Serial3.begin(9600);
-    Serial.flush();
-    Serial3.flush();
-}
-*/
-
-
-/* TODO:
+/* NOTES:
 0. each arduino will have an array from A5 to G0
   >>> element 0 is block A0, element 1 is B0... element 41 is block G5
     to keep track of which blocks have been selected
     keep this array in the stack of the main file in order
     make it permanent
-1. make both arduinos store the blocks entered in both arduinos
-  a. this will be done in the form of a 2D array
-    - array of 42 elements (representing the blocks)
-    - each of the 42 elements will contatain 2 integers:
-      > block state
-      > boat id
-  b. a block can have 8 states.
+1. a block can have 8 states.
     0 = undisturbed
     1 = has been shot but no boat
     2 = has a boat hidden; not shot
@@ -61,24 +41,9 @@ void setup() {
     6 = enemy's: shot but yes boat
     7 = enemy's: full boat sunk
     8 = enemy's: has boat but not shot
-  c. the array element will store a pointer to act as tuple.
-    i. the first element of the tuple represents the ship id.
-    ii. second element stores the block state
-    iii. if all blocks of a ship has been hit, it will be sunk
 */
 
-      /*
-      Block()  // declares the constructor --> initiates all values as 0
-      {
-        boat_id = 0;
-        block_state = 0;*/
 
-/*
-  uint8_t boat_id - the id of the boat that resides there
-  uint8_t block_state - the state of my block
-  uint8_t enemy_state - the enemy block state from my POV
-
-*/
 
 /*
   Inverse function of determine_block
@@ -123,9 +88,11 @@ String determine_block(uint8_t block_number) {
 
 
 /*
-  This following two function shows the game on serial-mon
-  This one print's the player's own blocks
+  The following four function shows the game on serial-mon
+  These are for debugging purposes
 */
+
+// Prints the user's block states
 void print_blocks(Block player_array[]){
   Serial.println();
   Serial.println("My Block States");
@@ -136,10 +103,7 @@ void print_blocks(Block player_array[]){
   Serial.println();
 }
 
-/*
-  This function shows the game on serial-mon
-  This one print's the player's enemy states
-*/
+// Prints the enemy's block states from the user's POV
 void print_blocks_2(Block player_array[]){
   Serial.println();
   Serial.println("Enemy States");
@@ -150,6 +114,7 @@ void print_blocks_2(Block player_array[]){
   Serial.println();
 }
 
+// Prints the user's boat id
 void print_blocks_3(Block player_array[]){
   Serial.println();
   Serial.println("My Boat ID's");
@@ -160,6 +125,7 @@ void print_blocks_3(Block player_array[]){
   Serial.println();
 }
 
+// Print the enemy's boat id
 void print_blocks_4(Block player_array[]){
   Serial.println();
   Serial.println("My Enemy's Boat ID's");
@@ -182,7 +148,8 @@ bool check_my_boat_sunk(Block play_arr[], uint8_t boat_id){
   uint8_t boat_count = 0;
   uint8_t shot_count = 0;
 
-  for(i=0;i<42;i++) {   /// count how many blocks has the same boat id
+  // count how many blocks has the same boat id
+  for(i=0;i<42;i++) {
     if (play_arr[i].getBoat() == boat_id) {
       boat_count++;
 
@@ -192,6 +159,7 @@ bool check_my_boat_sunk(Block play_arr[], uint8_t boat_id){
     }
   }
 
+  // if the two are equal, that means the boat is dead (return true;)
   if (boat_count == shot_count){
     return_val = true;
   } else {return_val = false;}
@@ -212,16 +180,15 @@ void kill_my_boat(Block play_arr[], uint8_t boat_id){
   }
 }
 
-/*
- * Use in conjuction with check_all_boat_sunk
- * If a boat is dead, make its state == 4
+/* 
+ * Use in conjuction with check_my_boat_sunk
+ * If my boat is dead, make its state == 4
  */
 void check_if_my_boat_sunk(Block play_arr[]){
   // iterate over the three boats hidden
   for (int i = 1; i < 4; i++) {
     if (check_my_boat_sunk(play_arr, i)) {
       kill_my_boat(play_arr, i);
-      // Maybe Do Something else here too. Like print the dead boat or something
     }
   }
 }
@@ -229,9 +196,9 @@ void check_if_my_boat_sunk(Block play_arr[]){
 
 
 /*
-Inputs: the player's array
-        enemy_block_number - the block that the enemy wants to attack
-Outputs: int, the new state of the block that the enemy shot
+  Inputs: the player's array
+          enemy_block_number - the block that the enemy wants to attack
+  Outputs: int, the new state of the block that the enemy shot
 */
 uint8_t recieve_turn(Block play_arr[], uint8_t boat_block_number){
   switch (play_arr[boat_block_number].getBlock()){
@@ -254,16 +221,18 @@ bool check_enemy_boat_sunk(Block play_arr[], uint8_t boat_id){
   uint8_t boat_count = 0;
   uint8_t shot_count = 0;
 
-  for(i=0;i<42;i++) {   /// count how many blocks has the same boat id
+  // count how many blocks has the same boat id
+  for(i=0;i<42;i++) {
     if (play_arr[i].getEnemyBoat() == boat_id) {
       boat_count++;
 
-    // if it's been shot and same boat id
+    // counts how the blocks have the same boat id and has been shot
     if (play_arr[i].getEnemy() == 6) {
       shot_count++;
     }
   }
 
+  // if it's equal, then boat is dead (return true); else false.
   if (boat_count == shot_count){
     return_val = true;
   } else {return_val = false;}
@@ -272,9 +241,8 @@ bool check_enemy_boat_sunk(Block play_arr[], uint8_t boat_id){
 }
 
 /*
-This will transform all blocks with the same boat id into shot (==4)
-Inputs: the player's array and the boat id
-Output: the number of blocks that's been equated to 4 (died)
+  This will transform all blocks with the same boat id into state 7
+  Inputs: the player's array and the boat id
  */
 void kill_enemy_boat(Block play_arr[], uint8_t boat_id){
   for(uint8_t i=0;i<42;i++) {
@@ -286,14 +254,16 @@ void kill_enemy_boat(Block play_arr[], uint8_t boat_id){
 
 /*
  * Use in conjuction with check_all_boat_sunk
- * If a boat is dead, make its state == 4
+ * If a boat is dead, make its state == 7
  */
 void check_if_enemy_boat_sunk(Block play_arr[]){
+
   // iterate over the three boats hidden
   for (int i = 1; i < 4; i++) {
+
+    // if the on all parts of enemy's boat are dead, make the state = 7
     if (check_enemy_boat_sunk(play_arr, i)) {
       kill_enemy_boat(play_arr, i);
-      // Maybe Do Something else here too. Like print the dead boat or something
     }
   }
 }
