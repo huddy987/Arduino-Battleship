@@ -41,7 +41,7 @@ int BOXSIZE = 40;
 // Define how many squares are allowed
 int squares_allowed = 12;
 
-// Define block
+// Define block and initiate them
 Block game_arr[] = {Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),
     Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),
     Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),Block(),
@@ -95,7 +95,7 @@ void play_game(){
   String *opponent;   // Opponent block array
   int already_selected = 0;
   int block_is_allowed = 0;   // used for checking if block is valid input
-  String frozen_boats[squares_allowed] = {};
+  String frozen_boats[squares_allowed] = {}; // used for checking freezing boats
 
   while(1){
     already_selected = 0;
@@ -149,7 +149,7 @@ void play_game(){
             draw_at_grid_pos(tft, BOXSIZE, selected[i], ILI9341_BLACK); // Draw black so the user knows we've removed it
             squares_selected--; // Reduce the counter by 1
 
-            Serial.print("squares_selected: ");Serial.println(squares_selected);
+            // draw the grey block with the right number of blocks needed for input
             draw_grey_setup(tft, BOXSIZE, squares_selected);
             selected[i] = "";  // Remove the entry from our list
             already_selected = 1;
@@ -174,10 +174,12 @@ void play_game(){
           // This is where my boy hudson puts the blocks inside the array
           selected[squares_selected] =  pos;  // Store the grid position in our array
 
+          // will be zero if the block selected is not adjacent to the previous blocks
           block_is_allowed = first_contact(selected, squares_selected + 1, squares_allowed);
 
+
           if (block_is_allowed && check_not_frozen(frozen_boats, pos, squares_allowed) ) {
-            // if block is allowed, 
+            // if block is allowed and not frozen
             Serial.println(selected[squares_selected]);
             draw_at_grid_pos(tft, BOXSIZE, pos, ILI9341_GREEN); // Draw green so the user knows we've registered their press
 
@@ -189,11 +191,10 @@ void play_game(){
             // draw the grey setup tile that says how many blocks the user should enter
             draw_grey_setup(tft, BOXSIZE, squares_selected);
           } else {
-            // if block is not allowed remove it
+            // if block is not allowed remove it from the array of blocks
             selected[squares_selected] =  "";
           }
 
-          //Serial.println(squares_selected);
 
           // Restart loop (need to do it this way to allow deselecting when there are 5 tiles)
           if (squares_selected == squares_allowed){
@@ -204,7 +205,8 @@ void play_game(){
           continue;
         
         } else {
-            // pass the array to a function and input the boat id's
+            // when the user is done inputting blocks, input the boat ID's
+            // print to serial mon for confirmation of setup
             input_boat_id(selected, game_arr);
             print_blocks_3(game_arr);
         }
@@ -230,6 +232,7 @@ void play_game(){
         opponent = client.receive_ships(squares_allowed);
 
         // assigns the boat IDs to my enemy's boat
+        // print to serial-mon for confirmation
         input_enemy_boat_id(opponent, game_arr);
         print_blocks_4(game_arr);
 
@@ -329,14 +332,15 @@ void play_game(){
         // Update your own block with what your enemy shot
         game_arr[determine_array_element(opponent[0])].updateBlock(recieve_turn(game_arr, determine_array_element(opponent[0])));
         
-        // do the check for the boats here for enemy and you
+        // Checks if any of my enemy's or my boats are dead
+        // if yes, convert the states to display the proper colour
         check_if_enemy_boat_sunk(game_arr);
         check_if_my_boat_sunk(game_arr);
 
 
 
 
-        // Debugging stuff
+        // Print the game states to serial-mon for debugging
         print_blocks_2(game_arr);
         delay(200);
         print_blocks(game_arr);
