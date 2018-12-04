@@ -1,13 +1,13 @@
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <SPI.h>             // Library for SPI mode
-#include <Adafruit_ILI9341.h> // Controller chip library
-#include "TouchScreen.h"    //Library for TouchScreen
-#include "block.h"
-#include "client.h"
-#include "draw_handler.h"
+#include <Adafruit_ILI9341.h>  // Controller chip library
+#include "TouchScreen.h"    // Library for TouchScreen
+#include "./block.h"
+#include "./client.h"
+#include "./draw_handler.h"
 
 // Block object constructor
-Block::Block(){
+Block::Block() {
       boat_id = 0;
       block_state = 0;
       enemy_state = 0;
@@ -35,7 +35,7 @@ void Block::updateEnemyBoat(uint8_t num) {
 }
 
 // returns boat_id
-uint8_t Block::getBoat(){
+uint8_t Block::getBoat() {
     return boat_id;
 }
 

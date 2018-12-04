@@ -2,32 +2,42 @@
 #include <SPI.h>             // Library for SPI mode
 #include <Adafruit_ILI9341.h>
 #include <Arduino.h>
-#include "block.h"    // Block class
-#include "game.h"     // Game class
-#include "data_handler.h"
-#include "game.h"     // Game class
-#include "boat_id.h"
+#include "./block.h"    // Block class
+#include "./game.h"     // Game class
+#include "./data_handler.h"
+#include "./boat_id.h"
 
 
 /*
   This function returns the characteristic of the first block of the boat inputter
-  Is used in conjuction with valid_second_block to determine if the 
+  Is used in conjuction with valid_second_block to determine if the
   subsequent blocks are valid or not
 */
-int determine_first_block_type(String grid_pos){
+int determine_first_block_type(String grid_pos) {
   int block_number =  determine_array_element(grid_pos);
 
   // These first four if-blocks deal with the corner cases
-  if (block_number == 35) {return (-1);}
-  else if (block_number == 41) {return (-2);}
-  else if (block_number == 0) {return (-3);}
-  else if (block_number == 6) {return (-4);}
+  if (block_number == 35) {
+    return (-1);
+  } else if (block_number == 41) {
+    return (-2);
+  } else if (block_number == 0) {
+    return (-3);
+  } else if (block_number == 6) {
+    return (-4);
+  }
 
-  if ((36<=block_number)&&(block_number<=40)) {return 1;}  // top row
-  else if ((1<=block_number)&&(block_number<=5)) {return 2;}  // bottom row
-  else if ((block_number%7)==0) {return 3;}  // left column
-  else if (((block_number+1)%7)==0) {return 4;} // right column
-  else {return 5;} // center row
+  if ((36 <= block_number)&&(block_number <= 40)) {
+    return 1;   // top row
+  } else if ((1 <= block_number)&&(block_number <= 5)) {
+    return 2;  // bottom row
+  } else if ((block_number % 7) == 0) {
+    return 3;  // left column
+  } else if (((block_number+1)%7) == 0) {
+    return 4;   // right column
+  } else {
+    return 5;  // center row
+  }
 }
 
 /*
@@ -48,46 +58,72 @@ int valid_second_block(String grid_pos1, String grid_pos2) {
   int return_val = 0;
 
   switch (first_block_type) {
-
     // CORNER CASES: Have to be handles specially due to having two constraints
-    case -1: // top Left
-      if (difference == 1) {return_val = 1;}  // they selected 36
-      else if (difference == -7) {return_val = -7;}  // they selected 28
-      else {return_val = 0;}   // invalid block
+    case -1:  // top Left
+      if (difference == 1) {
+        return_val = 1;   // they selected 36
+      } else if (difference == -7) {
+        return_val = -7;  // they selected 28
+      } else {
+        return_val = 0;    // invalid block
+      }
       break;
 
     case -2:  // top right
-      if (difference == -1) {return_val = -1;}  // they selected 40
-      else if (difference == -7) {return_val = -7;}  // they selected 34
-      else {return_val = 0;}   // invalid block
+      if (difference == -1) {
+        return_val = -1;   // they selected 40
+      } else if (difference == -7) {
+        return_val = -7;  // they selected 34
+      } else {
+        return_val = 0;  // invalid block
+      }
       break;
 
     case -3:  // bottom left
-      if (difference == 7) {return_val = 7;}  // they selected 7
-      else if (difference == 1) {return_val = 1;}  // they selected 34
-      else {return_val = 0;}   // invalid block
+      if (difference == 7) {\
+        return_val = 7;   // they selected 7
+      } else if (difference == 1) {
+        return_val = 1;   // they selected 34
+      } else {
+        return_val = 0;   // invalid block
+      }
       break;
 
     case -4:  // bottom right
-      if (difference == -1) {return_val = -1;}  // they selected 7
-      else if (difference == 7) {return_val = 7;}  // they selected 34
-      else {return_val = 0;}   // invalid block
+      if (difference == -1) {
+        return_val = -1;   // they selected 7
+      } else if (difference == 7) {
+        return_val = 7;  // they selected 34
+      } else {
+        return_val = 0;  // invalid block
+      }
       break;
 
 
     // SIDE CASES
     case  1:  // top row
-      if (difference == -1) {return_val = -1;}  // go left
-      else if (difference == 1) {return_val = 1;}  // go right
-      else if (difference == -7) {return_val = -7;}  // go down
-      else {return_val = 0;}   // invalid block
+      if (difference == -1) {
+        return_val = -1;  // go left
+      } else if (difference == 1) {
+        return_val = 1;  // go right
+      } else if (difference == -7) {
+        return_val = -7;  // go down
+      } else {
+        return_val = 0;   // invalid block
+      }
       break;
 
     case  2:  // bottom row
-      if (difference == -1) {return_val = -1;}  // go left
-      else if (difference == 1) {return_val = 1;}  // go right
-      else if (difference == 7) {return_val = 7;}  // go up
-      else {return_val = 0;}   // invalid block
+      if (difference == -1) {
+        return_val = -1;   // go left
+      }
+      else if (difference == 1) {
+        return_val = 1;   // go right
+      } else if (difference == 7) {
+        return_val = 7;   // go up
+      } else {
+        return_val = 0;   // invalid block
+      }
       break;
 
     case  3:  // left column
@@ -171,13 +207,13 @@ int valid_consequent_blocks(String grid_pos[], int squares_selected, int cardina
 
   // if +/- 7 is the block type, a difference of 7 with any of the blocks is acceptable
   if (abs(block_type) == 7) {
-    for (int i=0; i<(cardinal-1); i++){
+    for (int i=0; i<(cardinal-1); i++) {
       if (abs(differences[i]) == 7) {return 1;}
     }
   } else if (abs(block_type) == 1) {
 
     // if +/- 1 is the block type, a difference of 1 with any of the blocks is acceptable
-    for (int i=0; i<(cardinal-1); i++){
+    for (int i=0; i<(cardinal-1); i++) {
       if (abs(differences[i]) == 1) {
 
         // deals with the special cases as mentioned above
@@ -189,7 +225,8 @@ int valid_consequent_blocks(String grid_pos[], int squares_selected, int cardina
 
 
 /* This function assumes a 12 boat inputs with 5,4,3 blocks in that order */
-int first_contact(String block_arr[], int squares_selected, int squares_allowed){
+int first_contact(String block_arr[], int squares_selected,
+  int squares_allowed) {  // split in two because style wants me to
 
   int holder = 0;
   // this handles block number 1 and two for the three boats
@@ -198,7 +235,7 @@ int first_contact(String block_arr[], int squares_selected, int squares_allowed)
 
 
 
-  switch (squares_selected) { 
+  switch (squares_selected) {
 
     // first block of the boat
     case 1:
@@ -261,7 +298,7 @@ void input_boat_id(String selected_array[], Block game_arr[]) {
     // third boat
     else if ((9 <= i) && ( i <= 11)) {
       game_arr[determine_array_element(selected_array[i])].updateBoat(3);
-    } 
+    }
 
     // Should never execute
     else {Serial.println("Error in input_boat_id.");}
@@ -287,20 +324,20 @@ void input_enemy_boat_id(String selected_array[], Block game_arr[]) {
     // third boat
     else if ((9 <= i) && ( i <= 11)) {
       game_arr[determine_array_element(selected_array[i])].updateEnemyBoat(3);
-    } 
+    }
 
     // Should never execute
     else {Serial.println("Error in input_boat_id.");}
   }
 }
 
-/*  
+/*
  * This function disables the user from deselecting boats after the first
  * block of the next boat has been selected. This prohibits messing up the order
  * If a user want's to reset the inputs, they have to press the red block
- */ 
+ */
 void freeze_boat(String selected_array[], String frozen_boats[],  int squares_selected)  {
-  
+
   switch (squares_selected) {
     // first boat has been fully selected
     // if so, input the boat blocks into a frozen_boats array
