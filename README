@@ -1,14 +1,3 @@
-CURRENT BUGS:
-- Possible memory leak, creating new opponent array every time
-
-
-Fix Later
-- fix the select screen properly
-- maybe add the "RESET" to the red button when playing
-
-Fix Maybe
-- optimize drawing
-
 
 RESOURCES:
 

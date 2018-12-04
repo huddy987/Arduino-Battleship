@@ -16,6 +16,4 @@ String get_grid_position(TSPoint point, int BOXSIZE);
 // Loops continually until a press is registered
 void wait_for_touch(Adafruit_ILI9341 tft, TouchScreen ts, int MINPRESSURE);
 
-
-
 #endif

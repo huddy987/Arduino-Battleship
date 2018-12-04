@@ -153,11 +153,8 @@ void play_game() {
             selected[i] = "";
             frozen_boats[i] = "";
           }
-          draw_grey_setup(tft, BOXSIZE, squares_selected);
           continue;  // Restart the loop
         }
-
-
 
         // If confirm is pressed and not all tiles are selected, ignore the press
         if (get_confirm_or_cancel(point) == 1 && squares_selected < squares_allowed) {
@@ -174,7 +171,6 @@ void play_game() {
             squares_selected--;  // Reduce the counter by 1
 
             // draw the grey block with the right number of blocks needed for input
-            draw_grey_setup(tft, BOXSIZE, squares_selected);
             selected[i] = "";  // Remove the entry from our list
             already_selected = 1;
             break;
@@ -188,7 +184,10 @@ void play_game() {
         /* If squares selected is less than the amount of squares allowed,
            let the player choose another square. */
 
-        if (squares_selected < squares_allowed) {
+        if(squares_selected < squares_allowed){
+
+          draw_grey_setup(tft, BOXSIZE, squares_selected);  // Redraw grey confirm button
+
           // This is where my boy hudson puts the blocks inside the array
           selected[squares_selected] =  pos;  // Store the grid position in our array
 
@@ -318,17 +317,20 @@ void play_game() {
         // If squares selected is less then the amount of squares allowed,
         // let the player choose another square.
         if (squares_selected < 1) {
-          selected[0] =  pos;  // Store the grid position in our array
-          Serial.println(selected[0]);
+          // If the block state is 0 (undisturbed) or 8 (enemy hidden boat), allow the user to take a shot at that position
+          if(game_arr[determine_array_element(pos)].getEnemy() == 0 or game_arr[determine_array_element(pos)].getEnemy() == 8){
+            selected[0] =  pos;  // Store the grid position in our array
+            Serial.println(selected[0]);
 
-          // Draw green so the user knows we've registered their press
-          draw_at_grid_pos(tft, BOXSIZE, pos, ILI9341_GREEN);
-          squares_selected++;
+            // Draw green so the user knows we've registered their press
+            draw_at_grid_pos(tft, BOXSIZE, pos, ILI9341_GREEN);
+            squares_selected++;
 
-          // Restart loop (need to do it this way to allow deselecting when there are 5 tiles)
-          if (squares_selected == 1) {
-            // Change menu to confirm button once all tiles are selected
-            draw_green_confirm(tft, BOXSIZE);
+            // Restart loop (need to do it this way to allow deselecting when there are 5 tiles)
+            if (squares_selected == 1) {
+              // Change menu to confirm button once all tiles are selected
+              draw_green_confirm(tft, BOXSIZE);
+            }
           }
           delay(200);  // 200 ms delay to reduce accidental touches
           continue;
@@ -383,14 +385,13 @@ void play_game() {
         }
 
         // If no one has lost, draw your own map (updated)
-        draw_board_self(tft, BOXSIZE, game_arr, opponent);
+        //draw_board_self(tft, BOXSIZE, game_arr, opponent);
 
         // Wait until a touch is registered before continuing
         wait_for_touch(tft, ts, MINPRESSURE);
 
         // Show your opponents map (updated)
         draw_board_enemy(tft, BOXSIZE, game_arr, &selected[0]);
-        delay(1000);
 
         // Reset our variables to 0 so we can reuse them in the next loop
         squares_selected = 0;  // Reset the squares selected counter to 0
