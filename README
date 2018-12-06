@@ -1,7 +1,16 @@
+Made by Hudson https://github.com/huddy987 and Richmond https://github.com/naviza
+
+Hardware requirements:
+
+2 x Arduino MEGA 2560
+2 x Adafruit 2.4" TFT LCD (ILI9341)
+2 x breadboard
+25 x wires
+
+
 KNOWN ISSUES:
 
 If both players send boats at the same time, null data is sent over.
-
 
 RESOURCES:
 
@@ -13,11 +22,6 @@ ACKNOWLEDGEMENTS:
 The set up of the touchscreen display was inspired by code from the adafruit tutorials that showed how to set up and
 calibrate the screen. Code was written using adafruit libraries alongside the arduino library. Other than that,
 all code was written from scratch by us.
-
-NOTE FOR PRESENTATION
-- there is a small random chance that a cannon will misfire
-  and miss the block it was trying to hit
-
 
 WIRING:
 
@@ -34,6 +38,8 @@ PIN A10<--> DISPLAY Y+
 PIN 6<--> DISPLAY Y-
 TX3 <--> RX3
 RX3 <--> TX3
+ARDUINO 1 GND <--> ARDUINO 2 GND
+
 
 SCREEN DIAGRAM FOR REFERENCE (VARIABLES FOLLOW THIS GRID):
 
