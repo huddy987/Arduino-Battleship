@@ -33,18 +33,31 @@ all code was written from scratch by us.
 ## WIRING:
 
 GND <--> DISPLAY GND
+
 5V <--> DISPLAY VIN
+
 PIN 52 <--> DISPLAY CLK
+
 PIN 50 <--> DISPLAY MISO
+
 PIN 51 <--> DISPLAY MOSI
+
 PIN 10 <--> DISPLAY CS
+
 PIN 9 <--> DISPLAY D/C
+
 PIN 7<--> DISPLAY X+
+
 PIN A11<--> DISPLAY X-
+
 PIN A10<--> DISPLAY Y+
+
 PIN 6<--> DISPLAY Y-
+
 TX3 <--> RX3
+
 RX3 <--> TX3
+
 ARDUINO 1 GND <--> ARDUINO 2 GND
 
 
