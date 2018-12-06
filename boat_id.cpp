@@ -128,24 +128,24 @@ int valid_second_block(String grid_pos1, String grid_pos2) {
 
     case  3:  // left column
       if (difference == 1) {return_val = 1;}  // go right
-      else if (difference == 7) {return_val = 7;}  // go up
-      else if (difference == -7) {return_val = -7;}  // go up
+      else if (abs(difference) == 7) {return_val = 7;}  // go up
+      // else if (difference == -7) {return_val = -7;}  // go up see if this works
       else {return_val = 0;}   // invalid block
       break;
 
     case  4:  // right column
       if (difference == -1) {return_val = -1;}  // go right
-      else if (difference == 7) {return_val = 7;}  // go up
-      else if (difference == -7) {return_val = -7;}  // go up
+      else if (abs(difference) == 7) {return_val = 7;}  // go up
+      // else if (difference == -7) {return_val = -7;}  // go up: see if this works
       else {return_val = 0;}   // invalid block
       break;
 
     // CENTRE CASE
     case  5:  // centre tiles
-      if (difference == -1) {return_val = -1;}  // go left
-      else if (difference == 1) {return_val = 1;}  // go right
-      else if (difference == 7) {return_val = 7;}  // go up
-      else if (difference == -7) {return_val = -7;}  // go up
+      if (abs(difference) == 1) {return_val = 1;}  // go left
+      // else if (difference == 1) {return_val = 1;}  // go right: see if this works
+      else if (abs(difference) == 7) {return_val = 7;}  // go up
+      // else if (difference == -7) {return_val = -7;}  // go up: see if this works
       else {return_val = 0;}   // invalid block
       break;
   }
@@ -174,7 +174,7 @@ int special_case(int block_numbers[], int cardinal) {
         if (block_numbers[index] - block_numbers[cardinal-1] == 1) {return 0;}
     }
   }
-  
+
 
   // checks for the lower bound wraparound
   for (int i=0; i<(cardinal-1); i++) {
@@ -182,7 +182,7 @@ int special_case(int block_numbers[], int cardinal) {
         if (block_numbers[cardinal-1] - block_numbers[index] == 1) {return 0;}
     }
   }
-  
+
   return return_val;
 }
 
@@ -208,8 +208,8 @@ void print_consequents(int block_numbers[], int differences[], int cardinal, int
 // If yes, return 1 (true)
 // else return 0 (false)
 int valid_consequent_blocks(String grid_pos[], int squares_selected, int cardinal, int squares_allowed) {
-  
-  // this deals with the 
+
+  // this deals with the
   int holder1 = 0;
   if (squares_selected == 8 or squares_selected == 9)  {holder1 = 5;}
   else if (squares_selected == squares_allowed)  {holder1 = 9;}
@@ -266,7 +266,7 @@ int first_contact(String block_arr[], int squares_selected,
     case 6:
     case 10:
       Serial.println("First block of the boat: ");
-      return(determine_first_block_type(block_arr[holder]));
+      return(1);
 
     // second block of the boat
     case 2:

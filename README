@@ -10,6 +10,10 @@ The set up of the touchscreen display was inspired by code from the adafruit tut
 calibrate the screen. Code was written using adafruit libraries alongside the arduino library. Other than that,
 all code was written from scratch by us.
 
+NOTE FOR PRESENTATION
+- there is a small random chance that a cannon will misfire
+  and miss the block it was trying to hit
+
 
 WIRING:
 
