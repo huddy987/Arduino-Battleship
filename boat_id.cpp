@@ -128,24 +128,24 @@ int valid_second_block(String grid_pos1, String grid_pos2) {
 
     case  3:  // left column
       if (difference == 1) {return_val = 1;}  // go right
-      else if (difference == 7) {return_val = 7;}  // go up
-      else if (difference == -7) {return_val = -7;}  // go up
+      else if (abs(difference) == 7) {return_val = 7;}  // go up
+      // else if (difference == -7) {return_val = -7;}  // go up see if this works
       else {return_val = 0;}   // invalid block
       break;
 
     case  4:  // right column
       if (difference == -1) {return_val = -1;}  // go right
-      else if (difference == 7) {return_val = 7;}  // go up
-      else if (difference == -7) {return_val = -7;}  // go up
+      else if (abs(difference) == 7) {return_val = 7;}  // go up
+      // else if (difference == -7) {return_val = -7;}  // go up: see if this works
       else {return_val = 0;}   // invalid block
       break;
 
     // CENTRE CASE
     case  5:  // centre tiles
-      if (difference == -1) {return_val = -1;}  // go left
-      else if (difference == 1) {return_val = 1;}  // go right
-      else if (difference == 7) {return_val = 7;}  // go up
-      else if (difference == -7) {return_val = -7;}  // go up
+      if (abs(difference) == 1) {return_val = 1;}  // go left
+      // else if (difference == 1) {return_val = 1;}  // go right: see if this works
+      else if (abs(difference) == 7) {return_val = 7;}  // go up
+      // else if (difference == -7) {return_val = -7;}  // go up: see if this works
       else {return_val = 0;}   // invalid block
       break;
   }
@@ -162,40 +162,63 @@ int valid_second_block(String grid_pos1, String grid_pos2) {
  */
 int special_case(int block_numbers[], int cardinal) {
   // assumes true at first becuase this is true for most cases
+
+  // Serial.println("Special case cardinal: " + String(cardinal));
   int return_val = 1;
   int index;
 
   // This part checks for the upper bound wraparound
   for (int i=0; i<(cardinal-1); i++) {
-    if (block_numbers[i] % 7 == 0) {index = i; break;}
+    if (block_numbers[i] % 7 == 0) {
+        index = i;
+        if (block_numbers[index] - block_numbers[cardinal-1] == 1) {return 0;}
+    }
   }
-  if (block_numbers[index] - block_numbers[cardinal-1] == 1) {return 0;}
+
 
   // checks for the lower bound wraparound
   for (int i=0; i<(cardinal-1); i++) {
-    if ( (block_numbers[i] + 1) % 7 == 0) {index = i; break;}
+    if ( (block_numbers[i] + 1) % 7 == 0) {index = i;
+        if (block_numbers[cardinal-1] - block_numbers[index] == 1) {return 0;}
+    }
   }
-  if (block_numbers[cardinal-1] - block_numbers[index] == 1) {return 0;}
 
   return return_val;
 }
 
 
+void print_consequents(int block_numbers[], int differences[], int cardinal, int block_type) {
+    Serial.println("Block type " + String(block_type));
+    Serial.println();
+    Serial.println("Block Numbers of Current Boat:");
+    for (int i=0; i<cardinal; i++) {
+        Serial.println(block_numbers[i]);
+    }
+
+    Serial.println();
+
+    Serial.println("Difference between Array and Current block: ");
+    for (int i=0; i<(cardinal-1); i++) {
+        Serial.println(differences[i]);
+    }
+}
 
 // Determines if a block selected by the user is an allowed input or not
+// ASSUMPTION: boats will be entered 5-4-3
 // If yes, return 1 (true)
 // else return 0 (false)
-int valid_consequent_blocks(String grid_pos[], int squares_selected, int cardinal) {
+int valid_consequent_blocks(String grid_pos[], int squares_selected, int cardinal, int squares_allowed) {
+
+  // this deals with the
   int holder1 = 0;
   if (squares_selected == 8 or squares_selected == 9)  {holder1 = 5;}
-  else if (squares_selected == 12)  {holder1 = 9;}
+  else if (squares_selected == squares_allowed)  {holder1 = 9;}
 
   // make the array of the block numbers
   int block_numbers[cardinal];
   for (int i=0; i<cardinal; i++) {
     block_numbers[i] = determine_array_element(grid_pos[holder1 + i]);
   }
-
 
   // array of differences
   int differences[cardinal - 1];
@@ -204,6 +227,7 @@ int valid_consequent_blocks(String grid_pos[], int squares_selected, int cardina
   }
 
   int block_type = valid_second_block(grid_pos[holder1], grid_pos[holder1 + 1]);
+  // print_consequents(block_numbers, differences, cardinal, block_type);
 
   // if +/- 7 is the block type, a difference of 7 with any of the blocks is acceptable
   if (abs(block_type) == 7) {
@@ -217,7 +241,7 @@ int valid_consequent_blocks(String grid_pos[], int squares_selected, int cardina
       if (abs(differences[i]) == 1) {
 
         // deals with the special cases as mentioned above
-        return(special_case(block_numbers, cardinal));}
+        return (special_case(block_numbers, cardinal));}
     }
   }
   return 0;
@@ -241,14 +265,14 @@ int first_contact(String block_arr[], int squares_selected,
     case 1:
     case 6:
     case 10:
-      // Serial.println("First block of the boat: ");
-      return(determine_first_block_type(block_arr[holder]));
+      Serial.println("First block of the boat: ");
+      return(1);
 
     // second block of the boat
     case 2:
     case 7:
     case 11:
-      // Serial.println("Second block of the boat");
+      Serial.println("Second block of the boat");
       return(valid_second_block(block_arr[holder], block_arr[holder + 1]));
 
     // third block of the boat
@@ -256,19 +280,19 @@ int first_contact(String block_arr[], int squares_selected,
     case 8:
     case 12:
       // Serial.println("Third block of the boat");
-      return(valid_consequent_blocks(block_arr,squares_selected, 3));
+      return(valid_consequent_blocks(block_arr,squares_selected, 3, squares_allowed));
 
     // fourth block of the boat
     case 4:
     case 9:
       // Serial.println("Fourth block of the boat");
-      return(valid_consequent_blocks(block_arr,squares_selected, 4));
+      return(valid_consequent_blocks(block_arr,squares_selected, 4, squares_allowed));
       // return(valid_fourth_block(block_arr, squares_selected));
 
     // fifth block of the boat
     case 5:
       // Serial.println("Fifth block of the boat");
-      return(valid_consequent_blocks(block_arr,squares_selected, 5));
+      return(valid_consequent_blocks(block_arr,squares_selected, 5, squares_allowed));
       // return(valid_fifth_block(block_arr, squares_selected));
 
     default:
@@ -280,10 +304,10 @@ int first_contact(String block_arr[], int squares_selected,
 
 
 // assigns the boat ID's to the user's blocks
-void input_boat_id(String selected_array[], Block game_arr[]) {
+void input_boat_id(String selected_array[], Block game_arr[], int squares_allowed) {
 
   // iterate over the array of inputted blocks
-  for (int i = 0; i < 12; i++) {
+  for (int i = 0; i < squares_allowed; i++) {
 
     // first boat
     if ((0<=i) && (i<=4)) {
@@ -306,10 +330,10 @@ void input_boat_id(String selected_array[], Block game_arr[]) {
 }
 
 // assigns boat id to the enemy's blocks
-void input_enemy_boat_id(String selected_array[], Block game_arr[]) {
+void input_enemy_boat_id(String selected_array[], Block game_arr[], int squares_allowed) {
 
   // iterate over the array of inputted blocks
-  for (int i = 0; i < 12; i++) {
+  for (int i = 0; i < squares_allowed; i++) {
 
     // first boat
     if ((0<=i) && (i<=4)) {

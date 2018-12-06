@@ -7,7 +7,6 @@
 #include "./draw_handler.h"  // draw handler header file
 #include "./game.h"  // game class
 #include "./client.h"  // client class
-#include "./player.h"  // Player class
 #include "./data_handler.h"  // Block class and data handling functions
 #include "./boat_id.h"
 
@@ -111,8 +110,6 @@ void play_game() {
   // used for checking if block is valid input
   int block_is_allowed = 0;
 
-  // used for checking freezing boats
-  String frozen_boats[squares_allowed] = {};
 
   while (1) {
     already_selected = 0;
@@ -133,6 +130,7 @@ void play_game() {
     // Stores grid position in "A0" notation
     String pos = get_grid_position(point, BOXSIZE);
 
+
     switch (battleship.get_state()) {
       case 0:
         main_menu(tft, point, BOXSIZE);
@@ -148,10 +146,12 @@ void play_game() {
           // Draws board in a reset state
           clear_all_selections(tft, BOXSIZE, selected, squares_allowed);
 
+          // Redraw grey confirm button
+          draw_grey_setup(tft, BOXSIZE, squares_selected);
+
           // Replace selected squares in player's own array with 0
           for (int i = 0; i < squares_allowed; i++) {
             selected[i] = "";
-            frozen_boats[i] = "";
           }
           continue;  // Restart the loop
         }
@@ -160,18 +160,10 @@ void play_game() {
         if (get_confirm_or_cancel(point) == 1 && squares_selected < squares_allowed) {
           continue;
         }
-
-        // If a block has already been selected and it's not frozen, remove it from the list
+        // If a block has already been selected restart the loop
         for (int i = 0; i < squares_allowed; i++) {
-          if (pos == selected[i] && check_not_frozen(frozen_boats, pos, squares_allowed)) {
+          if (pos == selected[i]) {
             Serial.println(selected[i]);
-
-            // Draw black so the user knows we've removed it
-            draw_at_grid_pos(tft, BOXSIZE, selected[i], ILI9341_BLACK);
-            squares_selected--;  // Reduce the counter by 1
-
-            // draw the grey block with the right number of blocks needed for input
-            selected[i] = "";  // Remove the entry from our list
             already_selected = 1;
             break;
           }
@@ -195,15 +187,12 @@ void play_game() {
           block_is_allowed = first_contact(selected, squares_selected + 1, squares_allowed);
 
 
-          if (block_is_allowed && check_not_frozen(frozen_boats, pos, squares_allowed)) {
-            // if block is allowed and not frozen
+          if (block_is_allowed) {
+            // if block is allowed
             Serial.println(selected[squares_selected]);
 
             // Draw green so the user knows we've registered their press
             draw_at_grid_pos(tft, BOXSIZE, pos, ILI9341_GREEN);
-
-            // if the first block of the next boat has been selected, freeze the previous boat
-            freeze_boat(selected, frozen_boats,  squares_selected);
 
             squares_selected++;
 
@@ -226,10 +215,8 @@ void play_game() {
         } else {
             // when the user is done inputting blocks, input the boat ID's
             // print to serial mon for confirmation of setup
-            input_boat_id(selected, game_arr);
-            print_blocks_3(game_arr);
+            input_boat_id(selected, game_arr, squares_allowed);
         }
-
 
         // If confirm is not selected, restart the loop (wait)
         if (!(get_confirm_or_cancel(point) == 1)) {
@@ -252,8 +239,7 @@ void play_game() {
 
         // assigns the boat IDs to my enemy's boat
         // print to serial-mon for confirmation
-        input_enemy_boat_id(opponent, game_arr);
-        print_blocks_4(game_arr);
+        input_enemy_boat_id(opponent, game_arr, squares_allowed);
 
         // Update own blocks and enemy blocks
         for (int i = 0; i < squares_allowed; i++) {
@@ -273,6 +259,7 @@ void play_game() {
 
         // Reset our variables to 0 so we can reuse them in the next phase.
         squares_selected = 0;  // Reset the squares selected counter to 0
+        Serial3.flush();  // Ensure there is no garbage in the serial3 buffer
         for (int i = 0; i < squares_allowed; i++) {  // Replace selected squares in player's own array with 0
           selected[i] = "";
           opponent[i] = "";  // Remove the entry from the opponent's list
@@ -287,20 +274,24 @@ void play_game() {
           squares_selected = 0;  // Reset the squares selected counter to 0
 
           // Draws board in a reset state
-          clear_all_selections(tft, BOXSIZE, selected, squares_allowed);
+          clear_all_selections(tft, BOXSIZE, selected, 1);
 
           // Replace selected squares in player's own array with 0
-          for (int i = 0; i < squares_allowed; i++) {
-            selected[i] = "";
-          }
+          selected[0] = "";
           continue;  // Restart the loop
         }
+
         // If confirm is pressed before all tiles are selected, ignore the press
         if (get_confirm_or_cancel(point) == 1 && squares_selected < 1) {
           continue;
         }
+
         // If the block has already been selected, remove it from the list.
         if (pos == selected[0]) {
+          if(pos == ""){   // If we get a mistouch, restart the loop
+            Serial.println("mistouch");
+            continue;
+          }
           Serial.println(selected[0]);
 
           // Draw black so the user knows we've removed it
@@ -350,6 +341,9 @@ void play_game() {
         // Wait for other arduino
         client.wait(tft);
 
+        // clear serial3 buffer
+        Serial3.flush();
+
         // Send own selected tile to opponent
         client.send_ships(selected, 1);
 
@@ -357,6 +351,8 @@ void play_game() {
 
         // Receive a single block from opponent
         opponent = client.receive_ships(1);
+
+        delay(200);   // Small delay so data can be processed properly
 
         // Update enemy blocks with what you selected
         game_arr[determine_array_element(selected[0])].updateEnemy(update_my_array(game_arr, determine_array_element(selected[0])));
@@ -369,23 +365,13 @@ void play_game() {
         check_if_enemy_boat_sunk(game_arr);
         check_if_my_boat_sunk(game_arr);
 
-
-
-
-        // Print the game states to serial-mon for debugging
-        print_blocks_2(game_arr);
-        delay(200);
-        print_blocks(game_arr);
-        delay(200);
-
-
         // Check if you have lost or your enemy has lost, and set gamestate to 3 if it is
         if (check_deaths(game_arr, squares_allowed, &battleship)) {
           continue;   // If someone died, restart the loop
         }
 
         // If no one has lost, draw your own map (updated)
-        //draw_board_self(tft, BOXSIZE, game_arr, opponent);
+        draw_board_self(tft, BOXSIZE, game_arr, opponent);
 
         // Wait until a touch is registered before continuing
         wait_for_touch(tft, ts, MINPRESSURE);
@@ -394,6 +380,7 @@ void play_game() {
         draw_board_enemy(tft, BOXSIZE, game_arr, &selected[0]);
 
         // Reset our variables to 0 so we can reuse them in the next loop
+        Serial3.flush();  // Ensure there is no garbage in the serial3 buffer
         squares_selected = 0;  // Reset the squares selected counter to 0
         selected[0] = "";
         opponent[0] = "";  // Remove the entry from the opponent's list

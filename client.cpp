@@ -13,14 +13,12 @@ void Client::wait(Adafruit_ILI9341 tft){
     // Draw a waiting screen while waiting for the other arduino to respond
     draw_waiting(tft);
   }
-
-  // If we are waiting, loop until the other arduino responds
-  while(!Serial3.available()){
-    continue;
-  }
-  // Read the buffer to clear it if we recieve something
-  while(Serial3.available() > 0){
-    Serial3.read();
+  // Clear the buffer
+  while(true){
+    char ready_message = Serial3.read();
+    if (ready_message == 'Z'){
+      break;
+    }
   }
 }
 
@@ -33,8 +31,8 @@ void Client::send_ready_message(){
 // Sends own grid coordinates over serial3
 void Client::send_ships(String boat_array[], int length){
   for(int i = 0; i < length; i++){
-    Serial3.print(char(boat_array[i][0]));
-    Serial3.print(char(boat_array[i][1]));
+    Serial3.write(char(boat_array[i][0]));
+    Serial3.write(char(boat_array[i][1]));
   }
 }
 
@@ -49,7 +47,7 @@ String *Client::receive_ships(int length){
     if(current_index == (length)){  // If our counter is equal to the desired length, break
       break;
     }
-    else{
+    else {
       char byte = Serial3.read();
       if(counter < 2){
         tile = String(tile + byte); // Append the read byte to the tile

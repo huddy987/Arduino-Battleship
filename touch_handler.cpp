@@ -30,7 +30,7 @@ TSPoint get_point(Adafruit_ILI9341 tft, TouchScreen ts) {
 // Returns: 0 (none), 1 (confirm), 2 (cancel)
 int get_confirm_or_cancel(TSPoint point) {
   // If we are in the menu region
-  if (point.y < 40) {
+  if (point.y < 25) {
     // If we are in the confirm region, return 1
     if (point.x > 120) {
       return 1;
@@ -54,12 +54,12 @@ String get_grid_position(TSPoint point, int BOXSIZE) {
   for (int i = 7; i > 0; i--) {
     // If the y coordinate is greater then the multiple of the box,
     // we know it is inside the box at that index.
-    if (point.y >= (BOXSIZE * i)) {
+    if (point.y > (BOXSIZE * i - 15)) {   // -15 becuase of the screen calibration
       // Start at the largest box size
       for (int j = 5; j > -1; j--) {
         // If the x coordinate is greater then the multiple of the box,
         // we know it is inside the box at that index.
-        if (point.x >= (BOXSIZE * j)) {
+        if (point.x > (BOXSIZE * j)) {
           // Set the value of the grid position
           grid_pos = String(let[(i - 1)]) + String(num[j]);
           // Break here so we don't continually draw boxes in the x direction
@@ -74,7 +74,7 @@ String get_grid_position(TSPoint point, int BOXSIZE) {
     We should never hit this part of the function if we are using it properly;
     this should only be called in the grid region.
   */
-  return "Error";
+  return NULL;
 }
 
 // Loops continually until a press is registered
