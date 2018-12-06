@@ -1,3 +1,7 @@
+KNOWN ISSUES:
+
+If both players send boats at the same time, null data is sent over.
+
 
 RESOURCES:
 

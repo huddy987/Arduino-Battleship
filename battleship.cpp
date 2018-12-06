@@ -184,8 +184,7 @@ void play_game() {
           selected[squares_selected] =  pos;  // Store the grid position in our array
 
           // will be zero if the block selected is not adjacent to the previous blocks
-          block_is_allowed = 1;
-          //first_contact(selected, squares_selected + 1, squares_allowed);
+          block_is_allowed = first_contact(selected, squares_selected + 1, squares_allowed);
 
 
           if (block_is_allowed) {
@@ -275,20 +274,24 @@ void play_game() {
           squares_selected = 0;  // Reset the squares selected counter to 0
 
           // Draws board in a reset state
-          clear_all_selections(tft, BOXSIZE, selected, squares_allowed);
+          clear_all_selections(tft, BOXSIZE, selected, 1);
 
           // Replace selected squares in player's own array with 0
-          for (int i = 0; i < squares_allowed; i++) {
-            selected[i] = "";
-          }
+          selected[0] = "";
           continue;  // Restart the loop
         }
+
         // If confirm is pressed before all tiles are selected, ignore the press
         if (get_confirm_or_cancel(point) == 1 && squares_selected < 1) {
           continue;
         }
+
         // If the block has already been selected, remove it from the list.
         if (pos == selected[0]) {
+          if(pos == ""){   // If we get a mistouch, restart the loop
+            Serial.println("mistouch");
+            continue;
+          }
           Serial.println(selected[0]);
 
           // Draw black so the user knows we've removed it

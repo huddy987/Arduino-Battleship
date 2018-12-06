@@ -13,14 +13,12 @@ void Client::wait(Adafruit_ILI9341 tft){
     // Draw a waiting screen while waiting for the other arduino to respond
     draw_waiting(tft);
   }
-
-  // If we are waiting, loop until the other arduino responds
-  while(!Serial3.available()){
-    continue;
-  }
-  // Read the buffer to clear it if we recieve something
-  while(Serial3.available() > 0){
-    Serial3.read();
+  // Clear the buffer
+  while(true){
+    char ready_message = Serial3.read();
+    if (ready_message == 'Z'){
+      break;
+    }
   }
 }
 

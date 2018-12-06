@@ -54,7 +54,7 @@ String get_grid_position(TSPoint point, int BOXSIZE) {
   for (int i = 7; i > 0; i--) {
     // If the y coordinate is greater then the multiple of the box,
     // we know it is inside the box at that index.
-    if (point.y > (BOXSIZE * i)) {
+    if (point.y > (BOXSIZE * i - 15)) {   // -15 becuase of the screen calibration
       // Start at the largest box size
       for (int j = 5; j > -1; j--) {
         // If the x coordinate is greater then the multiple of the box,
