@@ -5,8 +5,11 @@
 ## Hardware requirements:
 
 2 x Arduino MEGA 2560
+
 2 x Adafruit 2.4" TFT LCD (ILI9341)
+
 2 x breadboard
+
 25 x wires
 
 
