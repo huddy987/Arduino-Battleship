@@ -156,8 +156,10 @@ void play_game() {
           continue;  // Restart the loop
         }
 
-        // If confirm is pressed and not all tiles are selected, ignore the press
-        if (get_confirm_or_cancel(point) == 1 && squares_selected < squares_allowed) {
+        // If confirm is pressed and not all tiles
+        // are selected, ignore the press
+        if (get_confirm_or_cancel(point) == 1 &&
+          squares_selected < squares_allowed) {
           continue;
         }
         // If a block has already been selected restart the loop
@@ -176,15 +178,18 @@ void play_game() {
         /* If squares selected is less than the amount of squares allowed,
            let the player choose another square. */
 
-        if(squares_selected < squares_allowed){
-
-          draw_grey_setup(tft, BOXSIZE, squares_selected);  // Redraw grey confirm button
+        if (squares_selected < squares_allowed) {
+          // Redraw grey confirm button
+          draw_grey_setup(tft, BOXSIZE, squares_selected);
 
           // This is where my boy hudson puts the blocks inside the array
-          selected[squares_selected] =  pos;  // Store the grid position in our array
+          // Store the grid position in our array
+          selected[squares_selected] =  pos;
 
-          // will be zero if the block selected is not adjacent to the previous blocks
-          block_is_allowed = first_contact(selected, squares_selected + 1, squares_allowed);
+          // will be zero if the block selected is
+          // not adjacent to the previous blocks
+          block_is_allowed = first_contact(selected, squares_selected + 1,
+                                            squares_allowed);
 
 
           if (block_is_allowed) {
@@ -196,7 +201,8 @@ void play_game() {
 
             squares_selected++;
 
-            // draw the grey setup tile that says how many blocks the user should enter
+            // draw the grey setup tile that says how
+            // many blocks the user should enter
             draw_grey_setup(tft, BOXSIZE, squares_selected);
           } else {
             // if block is not allowed remove it from the array of blocks
@@ -204,7 +210,8 @@ void play_game() {
           }
 
 
-          // Restart loop (need to do it this way to allow deselecting when there are 5 tiles)
+          // Restart loop (need to do it this way to
+          // allow deselecting when there are 5 tiles)
           if (squares_selected == squares_allowed) {
             // Change menu to confirm button once all tiles are selected
             draw_green_confirm(tft, BOXSIZE);
@@ -250,8 +257,10 @@ void play_game() {
           game_arr[determine_array_element(opponent[i])].updateEnemy(8);
         }
 
-        // If we make it down here, it means both arduinos have selected their tiles
-        // So we should update the gamestate
+        /* If we make it down here
+         it means both arduinos have selected their tiles
+         So we should update the gamestate
+        */
         battleship.update_state(2);
 
         // Draw an empty map
@@ -260,7 +269,9 @@ void play_game() {
         // Reset our variables to 0 so we can reuse them in the next phase.
         squares_selected = 0;  // Reset the squares selected counter to 0
         Serial3.flush();  // Ensure there is no garbage in the serial3 buffer
-        for (int i = 0; i < squares_allowed; i++) {  // Replace selected squares in player's own array with 0
+
+        // Replace selected squares in player's own array with 0
+        for (int i = 0; i < squares_allowed; i++) {
           selected[i] = "";
           opponent[i] = "";  // Remove the entry from the opponent's list
         }
@@ -288,7 +299,7 @@ void play_game() {
 
         // If the block has already been selected, remove it from the list.
         if (pos == selected[0]) {
-          if(pos == ""){   // If we get a mistouch, restart the loop
+          if (pos == "") {   // If we get a mistouch, restart the loop
             Serial.println("mistouch");
             continue;
           }
@@ -308,8 +319,10 @@ void play_game() {
         // If squares selected is less then the amount of squares allowed,
         // let the player choose another square.
         if (squares_selected < 1) {
-          // If the block state is 0 (undisturbed) or 8 (enemy hidden boat), allow the user to take a shot at that position
-          if(game_arr[determine_array_element(pos)].getEnemy() == 0 or game_arr[determine_array_element(pos)].getEnemy() == 8){
+          // If the block state is 0 (undisturbed) or 8 (enemy hidden boat)
+          // allow the user to take a shot at that position
+          if (game_arr[determine_array_element(pos)].getEnemy() == 0 ||
+              game_arr[determine_array_element(pos)].getEnemy() == 8) {
             selected[0] =  pos;  // Store the grid position in our array
             Serial.println(selected[0]);
 
@@ -317,7 +330,8 @@ void play_game() {
             draw_at_grid_pos(tft, BOXSIZE, pos, ILI9341_GREEN);
             squares_selected++;
 
-            // Restart loop (need to do it this way to allow deselecting when there are 5 tiles)
+            // Restart loop (need to do it this way
+            // to allow deselecting when there are 5 tiles)
             if (squares_selected == 1) {
               // Change menu to confirm button once all tiles are selected
               draw_green_confirm(tft, BOXSIZE);
@@ -365,7 +379,8 @@ void play_game() {
         check_if_enemy_boat_sunk(game_arr);
         check_if_my_boat_sunk(game_arr);
 
-        // Check if you have lost or your enemy has lost, and set gamestate to 3 if it is
+        // Check if you have lost or your enemy has lost
+        // and set gamestate to 3 if it is
         if (check_deaths(game_arr, squares_allowed, &battleship)) {
           continue;   // If someone died, restart the loop
         }

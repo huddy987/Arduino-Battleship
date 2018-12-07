@@ -2,11 +2,10 @@
 #include <SPI.h>             // Library for SPI mode
 #include <Adafruit_ILI9341.h>
 #include <Arduino.h>
-#include "block.h"    // Block class
-#include "game.h"     // Game class
-#include "data_handler.h"
+#include "./block.h"    // Block class
+#include "./game.h"     // Game class
+#include "./data_handler.h"
 
-// (*(play_arr + #)) --> this is the block object
 /*
                A   B    C     D    E   F    G
       -----------------------------------------
@@ -51,8 +50,8 @@
   Inputs: grid_pos - A0 to G5
   Output: element - which block number it is (0 to 41)
 */
-uint8_t determine_array_element(String grid_pos){
-  //idk if I can index strings in C++ so this should be fun to test
+uint8_t determine_array_element(String grid_pos) {
+  // idk if I can index strings in C++ so this should be fun to test
   uint8_t column = static_cast<int>(grid_pos[0]) - 64;
   uint8_t row = static_cast<int>(grid_pos[1]) - 48;
   uint8_t element = column + (row * 7) -1;
@@ -62,25 +61,30 @@ uint8_t determine_array_element(String grid_pos){
 /*
   Inverse function of determine_array_element
 
-  Inputs: block_number - 0 to 41 only
+  Inputs: block_number - 0 to 41, inclusive, only
   Output: String block - A0 to G5
 */
 String determine_block(uint8_t block_number) {
-  String a,b;
-
+  String a, b;
   uint8_t column;
-  for (uint8_t i=0; i<7 ; i++) {
-    if (((block_number-i)%7)==0) {column = i; break;}
+  for (uint8_t i = 0; i < 7 ; i++) {
+    if (((block_number-i) % 7) == 0) {column = i; break;}
   }
-  a = String((char(column + 65)));
+  a = String((static_cast<char>(column + 65)));
 
-  if ((0<=block_number)&&(block_number<=6)) {b = "0";}
-  else if ((7<=block_number)&&(block_number<=13)) {b = "1";}
-  else if ((14<=block_number)&&(block_number<=20)) {b = "2";}
-  else if ((21<=block_number)&&(block_number<=27)) {b = "3";}
-  else if ((28<=block_number)&&(block_number<=34)) {b = "4";}
-  else if ((35<=block_number)&&(block_number<=41)) {b = "5";}
-  else {Serial.println("Error in determine_block.");}
+  if ((0 <= block_number)&&(block_number <= 6)) {
+    b = "0";
+  } else if ((7 <= block_number)&&(block_number <= 13)) {
+    b = "1";
+  } else if ((14 <= block_number)&&(block_number <= 20)) {
+    b = "2";
+  } else if ((21 <= block_number)&&(block_number <= 27)) {
+    b = "3";
+  } else if ((28 <= block_number)&&(block_number <= 34)) {
+    b = "4";
+  } else if ((35 <= block_number)&&(block_number <= 41)) {
+    b = "5";
+  } else {Serial.println("Error in determine_block.");}
 
   // Just concatenate String a and String b here
   return ((a+b));
@@ -93,45 +97,60 @@ String determine_block(uint8_t block_number) {
 */
 
 // Prints the user's block states
-void print_blocks(Block player_array[]){
+void print_blocks(Block player_array[]) {
   Serial.println();
   Serial.println("My Block States");
-  for(int i=1; i<43; i++){
-    if ((i%7)==0) {Serial.print((*(player_array + i - 1)).getBlock());Serial.println();}
-    else {Serial.print((*(player_array + i - 1)).getBlock());}
+  for (int i = 1; i < 43; i++) {
+    if ((i%7) == 0) {Serial.print((*(player_array +
+      i - 1)).getBlock()); Serial.println();
+    } else {
+      Serial.print((*(player_array + i - 1)).getBlock());
+    }
   }
   Serial.println();
 }
 
 // Prints the enemy's block states from the user's POV
-void print_blocks_2(Block player_array[]){
+void print_blocks_2(Block player_array[]) {
   Serial.println();
   Serial.println("Enemy States");
-  for(int i=1; i<43; i++){
-    if ((i%7)==0) {Serial.print((*(player_array + i - 1)).getEnemy());Serial.println();}
-    else {Serial.print((*(player_array + i - 1)).getEnemy());}
+  for (int i = 1; i < 43; i++) {
+    if ((i%7) == 0) {
+      Serial.print((*(player_array + i -1)).getEnemy());
+      Serial.println();
+    } else {
+      Serial.print((*(player_array + i - 1)).getEnemy());
+    }
   }
   Serial.println();
 }
 
 // Prints the user's boat id
-void print_blocks_3(Block player_array[]){
+void print_blocks_3(Block player_array[]) {
   Serial.println();
   Serial.println("My Boat ID's");
-  for(int i=1; i<43; i++){
-    if ((i%7)==0) {Serial.print((*(player_array + i - 1)).getBoat());Serial.println();}
-    else {Serial.print((*(player_array + i - 1)).getBoat());}
+  for (int i = 1; i < 43; i++) {
+    if ((i%7) == 0) {
+      Serial.print((*(player_array + i - 1)).getBoat());
+      Serial.println();
+    } else {
+      Serial.print((*(player_array + i - 1)).getBoat());
+    }
   }
   Serial.println();
 }
 
 // Print the enemy's boat id
-void print_blocks_4(Block player_array[]){
+void print_blocks_4(Block player_array[]) {
   Serial.println();
   Serial.println("My Enemy's Boat ID's");
-  for(int i=1; i<43; i++){
-    if ((i%7)==0) {Serial.print((*(player_array + i - 1)).getEnemyBoat());Serial.println();}
-    else {Serial.print((*(player_array + i - 1)).getEnemyBoat());}
+  for (int i = 1; i < 43; i++) {
+    if ((i%7) == 0) {
+      Serial.print((*(player_array + i - 1)).getEnemyBoat());
+      Serial.println();
+    } else {
+      Serial.print((*(player_array + i - 1)).getEnemyBoat());
+    }
   }
   Serial.println();
 }
@@ -143,13 +162,13 @@ Inputs: the player's array and the boat id
 Output: true - if all blocks with the same boat id has been shot (==3)
         false - otherwise
 */
-bool check_my_boat_sunk(Block play_arr[], uint8_t boat_id){
+bool check_my_boat_sunk(Block play_arr[], uint8_t boat_id) {
   uint8_t i, return_val;
   uint8_t boat_count = 0;
   uint8_t shot_count = 0;
 
   // count how many blocks has the same boat id
-  for(i=0;i<42;i++) {
+  for (i = 0; i < 42; i++) {
     if (play_arr[i].getBoat() == boat_id) {
       boat_count++;
 
@@ -160,7 +179,7 @@ bool check_my_boat_sunk(Block play_arr[], uint8_t boat_id){
   }
 
   // if the two are equal, that means the boat is dead (return true;)
-  if (boat_count == shot_count){
+  if (boat_count == shot_count) {
     return_val = true;
   } else {return_val = false;}
   }
@@ -172,19 +191,19 @@ This will transform all blocks with the same boat id into shot (==4)
 Inputs: the player's array and the boat id
 Output: the number of blocks that's been equated to 4 (died)
  */
-void kill_my_boat(Block play_arr[], uint8_t boat_id){
-  for(uint8_t i=0;i<42;i++) {
+void kill_my_boat(Block play_arr[], uint8_t boat_id) {
+  for (uint8_t i = 0; i < 42; i++) {
     if (((*(play_arr + i)).getBoat()) == boat_id) {
       (*(play_arr + i)).updateBlock(4);
     }
   }
 }
 
-/* 
+/*
  * Use in conjuction with check_my_boat_sunk
  * If my boat is dead, make its state == 4
  */
-void check_if_my_boat_sunk(Block play_arr[]){
+void check_if_my_boat_sunk(Block play_arr[]) {
   // iterate over the three boats hidden
   for (int i = 1; i < 4; i++) {
     if (check_my_boat_sunk(play_arr, i)) {
@@ -193,15 +212,13 @@ void check_if_my_boat_sunk(Block play_arr[]){
   }
 }
 
-
-
 /*
   Inputs: the player's array
           enemy_block_number - the block that the enemy wants to attack
   Outputs: int, the new state of the block that the enemy shot
 */
-uint8_t recieve_turn(Block play_arr[], uint8_t boat_block_number){
-  switch (play_arr[boat_block_number].getBlock()){
+uint8_t recieve_turn(Block play_arr[], uint8_t boat_block_number) {
+  switch (play_arr[boat_block_number].getBlock()) {
     case 0:
       return 1;
     case 2:
@@ -210,19 +227,18 @@ uint8_t recieve_turn(Block play_arr[], uint8_t boat_block_number){
   }
 }
 
-
 /*
 Inputs: the player's array and the boat id
 Output: true - if all blocks with the same boat id has been shot (==3)
         false - otherwise
 */
-bool check_enemy_boat_sunk(Block play_arr[], uint8_t boat_id){
+bool check_enemy_boat_sunk(Block play_arr[], uint8_t boat_id) {
   uint8_t i, return_val;
   uint8_t boat_count = 0;
   uint8_t shot_count = 0;
 
   // count how many blocks has the same boat id
-  for(i=0;i<42;i++) {
+  for (i = 0; i < 42; i++) {
     if (play_arr[i].getEnemyBoat() == boat_id) {
       boat_count++;
 
@@ -233,7 +249,7 @@ bool check_enemy_boat_sunk(Block play_arr[], uint8_t boat_id){
   }
 
   // if it's equal, then boat is dead (return true); else false.
-  if (boat_count == shot_count){
+  if (boat_count == shot_count) {
     return_val = true;
   } else {return_val = false;}
   }
@@ -244,8 +260,8 @@ bool check_enemy_boat_sunk(Block play_arr[], uint8_t boat_id){
   This will transform all blocks with the same boat id into state 7
   Inputs: the player's array and the boat id
  */
-void kill_enemy_boat(Block play_arr[], uint8_t boat_id){
-  for(uint8_t i=0;i<42;i++) {
+void kill_enemy_boat(Block play_arr[], uint8_t boat_id) {
+  for (uint8_t i = 0; i < 42; i++) {
     if (((*(play_arr + i)).getEnemyBoat()) == boat_id) {
       (*(play_arr + i)).updateEnemy(7);
     }
@@ -256,11 +272,9 @@ void kill_enemy_boat(Block play_arr[], uint8_t boat_id){
  * Use in conjuction with check_all_boat_sunk
  * If a boat is dead, make its state == 7
  */
-void check_if_enemy_boat_sunk(Block play_arr[]){
-
+void check_if_enemy_boat_sunk(Block play_arr[]) {
   // iterate over the three boats hidden
   for (int i = 1; i < 4; i++) {
-
     // if the on all parts of enemy's boat are dead, make the state = 7
     if (check_enemy_boat_sunk(play_arr, i)) {
       kill_enemy_boat(play_arr, i);
@@ -273,8 +287,7 @@ Inputs: the player's array
         my_block_number - the block number that I shot
 Outputs: the new block state of the block that I shot
 */
-uint8_t update_my_array(Block play_arr[], uint8_t my_block_number){
-
+uint8_t update_my_array(Block play_arr[], uint8_t my_block_number) {
   switch (play_arr[my_block_number].getEnemy()) {
     case 0:
       return 5;   // If there's no boat, return 5
@@ -287,12 +300,12 @@ uint8_t update_my_array(Block play_arr[], uint8_t my_block_number){
 /*
 Checks if we have lost, returns 1 if they have
 */
-bool check_self_death(Block play_arr[], uint8_t blocks_allowed){
+bool check_self_death(Block play_arr[], uint8_t blocks_allowed) {
   uint8_t counter = 0;
-  for(int i = 0; i < 42; i++){
-    if(play_arr[i].getBlock() == 4){    // If all boats are sunk
+  for (int i = 0; i < 42; i++) {
+    if (play_arr[i].getBlock() == 4) {    // If all boats are sunk
         counter++;
-        if(counter == blocks_allowed){
+        if (counter == blocks_allowed) {
           return true;
         }
     }
@@ -303,12 +316,12 @@ bool check_self_death(Block play_arr[], uint8_t blocks_allowed){
 /*
 Checks if enemy has lost, returns 1 if they have
 */
-bool check_enemy_death(Block play_arr[], uint8_t blocks_allowed){
+bool check_enemy_death(Block play_arr[], uint8_t blocks_allowed) {
   uint8_t counter = 0;
-  for(int i = 0; i < 42; i++){
-    if(play_arr[i].getEnemy() == 7){   // If all boats are sunk
+  for (int i = 0; i < 42; i++) {
+    if (play_arr[i].getEnemy() == 7) {   // If all boats are sunk
         counter++;
-        if(counter == blocks_allowed){
+        if (counter == blocks_allowed) {
           return true;
         }
     }
@@ -317,28 +330,23 @@ bool check_enemy_death(Block play_arr[], uint8_t blocks_allowed){
 }
 
 
-// Check if you have lost or your enemy has lost, and set gamestate to 3 if it is
+// Check if you have lost or your enemy has lost --> set gamestate to 3 if it is
 // Updates the game object to the appropriate alive status (using pointers)
 // Returns 0 or 1 so we can either continue in the loop or not
 // https://stackoverflow.com/questions/8095078/how-to-modify-a-struct-in-a-function-and-return-to-main
-bool check_deaths(Block play_arr[], int squares_allowed, Game *game){
-
+bool check_deaths(Block play_arr[], int squares_allowed, Game *game) {
   // We have tied, skip game screen
-  if (check_self_death(play_arr, squares_allowed) and check_enemy_death(play_arr, squares_allowed)){
+  if (check_self_death(play_arr, squares_allowed) && check_enemy_death(play_arr, squares_allowed)) {
     game->update_is_alive(2);
     game->update_state(3);
     return 1;
-  }
-
-  // We have lost, skip to end game screen
-  else if (check_self_death(play_arr, squares_allowed)){
+  } else if (check_self_death(play_arr, squares_allowed)) {
+      // We have lost, skip to end game screen
     game->update_is_alive(0);
     game->update_state(3);
     return 1;
-  }
-
-  // We have won, skip to end game screen
-  else if (check_enemy_death(play_arr, squares_allowed)){
+  } else if (check_enemy_death(play_arr, squares_allowed)) {
+    // We have won, skip to end game screen
     game->update_is_alive(1);
     game->update_state(3);
     return 1;
@@ -347,8 +355,8 @@ bool check_deaths(Block play_arr[], int squares_allowed, Game *game){
 }
 
 // Determines block state before it was shot
-int determine_previous_state(Block play_arr[], uint8_t boat_block_number){
-  switch (play_arr[boat_block_number].getBlock()){
+int determine_previous_state(Block play_arr[], uint8_t boat_block_number) {
+  switch (play_arr[boat_block_number].getBlock()) {
     case 1:   // If it was a miss, return the undisturbed case
       return 0;
     case 3:

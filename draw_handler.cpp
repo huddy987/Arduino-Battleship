@@ -158,7 +158,7 @@ void draw_at_grid_pos(Adafruit_ILI9341 display, int BOXSIZE,
 // Clears selected tile(s)
 void clear_all_selections(Adafruit_ILI9341 display, int BOXSIZE,
                           String block_array[], int length) {
-  for(int i = 0; i < length; i++) {
+  for (int i = 0; i < length; i++) {
     // Draw black at every previously selected square
     draw_at_grid_pos(display, BOXSIZE, block_array[i], ILI9341_BLACK);
   }
@@ -179,7 +179,7 @@ void clear_all_selections(Adafruit_ILI9341 display, int BOXSIZE,
 // Draws state-relevent color at given grid position
 void draw_state(Adafruit_ILI9341 display, int BOXSIZE,
                 String grid_pos, int state) {
-  switch(state){
+  switch (state) {
     case 0:
     case 8:
        // Case 0 is the same as case 8 for the purpose of drawing
@@ -211,22 +211,26 @@ void draw_state(Adafruit_ILI9341 display, int BOXSIZE,
 // Blinks a selected grid position a given amount of times
 // mode 0: show my enemy's shot on my board
 // mode 1: show my shot on my enemy's board
-void blink_block(Adafruit_ILI9341 display, int BOXSIZE, Block play_arr[], String *grid_pos, int blink_times, int mode) {
-  int block_number = determine_array_element(*grid_pos);  // Converts grid position to grid number
-   int previous_state = determine_previous_state(play_arr, block_number);  // Determine the state before it was shot
+void blink_block(Adafruit_ILI9341 display, int BOXSIZE,
+  Block play_arr[], String *grid_pos, int blink_times, int mode) {
+  // Converts grid position to grid number
+  int block_number = determine_array_element(*grid_pos);
+  // Determine the state before it was shot
+  int previous_state = determine_previous_state(play_arr, block_number);
 
-  for(int i = 0; i < blink_times; i++) {
-    if(mode == 0){
-      delay(250); // Half second delay between transitions
+  for (int i = 0; i < blink_times; i++) {
+    if (mode == 0) {
+      delay(250);  // Half second delay between transitions
       draw_state(display, BOXSIZE, *grid_pos, previous_state);
       delay(250);
-      draw_state(display, BOXSIZE, *grid_pos, play_arr[block_number].getBlock());
-
-    } else if(mode == 1) {
-      delay(250); // Half second delay between transitions
+      draw_state(display, BOXSIZE, *grid_pos,
+        play_arr[block_number].getBlock());
+    } else if (mode == 1) {
+      delay(250);  // Half second delay between transitions
       draw_at_grid_pos(display, BOXSIZE, *grid_pos, ILI9341_BLACK);
       delay(250);
-      draw_state(display, BOXSIZE, *grid_pos, play_arr[block_number].getEnemy());
+      draw_state(display, BOXSIZE, *grid_pos,
+        play_arr[block_number].getEnemy());
     }
   }
 }
@@ -242,11 +246,13 @@ void draw_opponent_message(Adafruit_ILI9341 display) {
 }
 
 // Draws appropriate color at every grid position on our own board
-void draw_board_self(Adafruit_ILI9341 display, int BOXSIZE, Block play_arr[], String *opponent_selection) {
-  // Need to do this to rotate to standard game rotations as specified in readme (after main menu).
+void draw_board_self(Adafruit_ILI9341 display,
+  int BOXSIZE, Block play_arr[], String *opponent_selection) {
+  // Need to do this to rotate to standard game rotations as
+  // specified in readme (after main menu).
   display.setRotation(0);
   draw_empty_grid(display, BOXSIZE);
-  for(int i = 0; i < 42; i++){
+  for (int i = 0; i < 42; i++) {
     // Draw the state for each self block
     draw_state(display, BOXSIZE, determine_block(i), play_arr[i].getBlock());
   }
@@ -257,9 +263,10 @@ void draw_board_self(Adafruit_ILI9341 display, int BOXSIZE, Block play_arr[], St
 }
 
 // Draws appropriate color at every grid position on the enemy's board
-void draw_board_enemy(Adafruit_ILI9341 display, int BOXSIZE, Block play_arr[], String *my_selection) {
+void draw_board_enemy(Adafruit_ILI9341 display, int BOXSIZE,
+  Block play_arr[], String *my_selection) {
   draw_empty_map(display, BOXSIZE);
-  for(int i = 0; i < 42; i++) {
+  for (int i = 0; i < 42; i++) {
     // Draw the state for each self block
     draw_state(display, BOXSIZE, determine_block(i), play_arr[i].getEnemy());
   }
@@ -267,12 +274,12 @@ void draw_board_enemy(Adafruit_ILI9341 display, int BOXSIZE, Block play_arr[], S
   blink_block(display, BOXSIZE, play_arr, my_selection, 1, 1);
 }
 
-/* 
+/*
  * This function draws the grey block that
  * tells the user how many blocks to press
  * SELECT + <a number>
  */
-void draw_select(Adafruit_ILI9341 display, int BOXSIZE, String message){
+void draw_select(Adafruit_ILI9341 display, int BOXSIZE, String message) {
   display.fillRect(120, 0, 120, BOXSIZE, 0x8410);
   display.setTextColor(ILI9341_WHITE);
   display.setTextSize(2);
@@ -280,24 +287,26 @@ void draw_select(Adafruit_ILI9341 display, int BOXSIZE, String message){
   display.print("SELECT " + message);
 }
 
-/* 
+/*
  * This function determines how many blocks the user should enter
  * and calls a function to let prompt the user for the boat
  */
-void draw_grey_setup(Adafruit_ILI9341 display, int BOXSIZE, int block_number){
+void draw_grey_setup(Adafruit_ILI9341 display, int BOXSIZE, int block_number) {
   String message = "";
 
   // if the first boat has not been entered fully
-  if ((0<=block_number)&&(block_number<=4)) {message = "5";}
-
-  // if the second boat has not been entered fully
-  else if ((5<=block_number)&&(block_number<=8)) {message = "4";}
-
-  // if the thrid boat has not been entered fully
-  else if ((9<=block_number)&&(block_number<=13)) {message = "3";}
-
-  // This should never execute
-  else {Serial.println("Error in draw_grey_setup.");}
+  if ((0 <= block_number) && (block_number <= 4)) {
+    message = "5";
+  } else if ((5 <= block_number) && (block_number <= 8)) {
+      // if the second boat has not been entered fully
+    message = "4";
+  } else if ((9 <= block_number) && (block_number <= 13)) {
+    // if the thrid boat has not been entered fully
+    message = "3";
+  } else {
+      // This should never execute
+    Serial.println("Error in draw_grey_setup.");
+  }
 
   // Calls the function that actually does the drawing
   draw_select(display, BOXSIZE, message);
