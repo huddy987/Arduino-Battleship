@@ -336,7 +336,8 @@ bool check_enemy_death(Block play_arr[], uint8_t blocks_allowed) {
 // https://stackoverflow.com/questions/8095078/how-to-modify-a-struct-in-a-function-and-return-to-main
 bool check_deaths(Block play_arr[], int squares_allowed, Game *game) {
   // We have tied, skip game screen
-  if (check_self_death(play_arr, squares_allowed) && check_enemy_death(play_arr, squares_allowed)) {
+  if (check_self_death(play_arr, squares_allowed)
+    && check_enemy_death(play_arr, squares_allowed)) {
     game->update_is_alive(2);
     game->update_state(3);
     return 1;

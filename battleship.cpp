@@ -369,10 +369,14 @@ void play_game() {
         delay(200);   // Small delay so data can be processed properly
 
         // Update enemy blocks with what you selected
-        game_arr[determine_array_element(selected[0])].updateEnemy(update_my_array(game_arr, determine_array_element(selected[0])));
+        game_arr[determine_array_element(selected[
+          0])].updateEnemy(update_my_array(game_arr,
+            determine_array_element(selected[0])));
 
         // Update your own block with what your enemy shot
-        game_arr[determine_array_element(opponent[0])].updateBlock(recieve_turn(game_arr, determine_array_element(opponent[0])));
+        game_arr[determine_array_element(opponent[
+          0])].updateBlock(recieve_turn(game_arr,
+            determine_array_element(opponent[0])));
 
         // Checks if any of my enemy's or my boats are dead
         // if yes, convert the states to display the proper colour
