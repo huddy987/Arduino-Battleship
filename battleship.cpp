@@ -2,7 +2,7 @@
 #include <SPI.h>             // Library for SPI mode
 #include <Adafruit_ILI9341.h>  // Controller chip library
 #include "TouchScreen.h"    // Library for TouchScreen
-#include "./block.h"
+#include "./block.h"  // block class
 #include "./touch_handler.h"  // touch handler header file
 #include "./draw_handler.h"  // draw handler header file
 #include "./game.h"  // game class
@@ -10,6 +10,8 @@
 #include "./data_handler.h"  // Block class and data handling functions
 #include "./boat_id.h"
 
+// Debug flag
+bool debug = false;
 
 // These are the four touchscreen analog pins
 #define YP A10  // must be an analog pin, use "An" notation!
@@ -51,12 +53,14 @@ Block game_arr[] = {Block(), Block(), Block(), Block(),
     Block(), Block(), Block(), Block(), Block(), Block(),
     Block(), Block()};
 
+// Set up arduino funcionality
 void setup_arduino() {
   init();
   Serial.flush();   // Ensure there is no garbage in the serial buffer
   Serial3.flush();  // Ensure there is no garbage in the serial3 buffer
   Serial.begin(9600);
   Serial3.begin(9600);
+  // Serial-mon message confirming that the arduinos are working properly
   Serial.println("Welcome to Battleship!");
 
   tft.begin();
@@ -87,10 +91,11 @@ void main_menu(Adafruit_ILI9341 tft, TSPoint point, int BOXSIZE) {
 
   // Draw an empty map
   draw_empty_map(tft, BOXSIZE);
+  // Draw a message telling the user to select 5 tiles
   draw_select(tft, BOXSIZE, "5");
 }
 
-
+// Main control function for the game
 void play_game() {
   // Calibrate minimum pressure to be considered a touch
   #define MINPRESSURE 10
@@ -105,6 +110,8 @@ void play_game() {
 
   // Opponent block array
   String *opponent;
+
+  // Flag for checking if a block has already been selected
   int already_selected = 0;
 
   // used for checking if block is valid input
@@ -112,6 +119,7 @@ void play_game() {
 
 
   while (1) {
+    // At the beginning of each loop, assume pressed block is not selected
     already_selected = 0;
 
     // Get a point and map it to the screen dimensions
@@ -133,6 +141,7 @@ void play_game() {
 
     switch (battleship.get_state()) {
       case 0:
+      // Main menu phase
         main_menu(tft, point, BOXSIZE);
         break;
 
@@ -165,7 +174,10 @@ void play_game() {
         // If a block has already been selected restart the loop
         for (int i = 0; i < squares_allowed; i++) {
           if (pos == selected[i]) {
-            Serial.println(selected[i]);
+            if(debug == true){
+              // Print the grid position if we are in debug mode
+              Serial.println(selected[i]);
+            }
             already_selected = 1;
             break;
           }
@@ -193,8 +205,10 @@ void play_game() {
 
 
           if (block_is_allowed) {
-            // if block is allowed
-            Serial.println(selected[squares_selected]);
+            if(debug == true){
+              // Print the grid position if we are in debug mode
+              Serial.println(selected[squares_selected]);
+            }
 
             // Draw green so the user knows we've registered their press
             draw_at_grid_pos(tft, BOXSIZE, pos, ILI9341_GREEN);
@@ -209,7 +223,6 @@ void play_game() {
             selected[squares_selected] =  "";
           }
 
-
           // Restart loop (need to do it this way to
           // allow deselecting when there are 5 tiles)
           if (squares_selected == squares_allowed) {
@@ -221,8 +234,13 @@ void play_game() {
 
         } else {
             // when the user is done inputting blocks, input the boat ID's
-            // print to serial mon for confirmation of setup
+            // print to serial-mon for confirmation
             input_boat_id(selected, game_arr, squares_allowed);
+
+            if (debug == true){
+              // Print self gamestate to serial-mon for debugging
+              print_blocks_3(game_arr);
+            }
         }
 
         // If confirm is not selected, restart the loop (wait)
@@ -241,12 +259,16 @@ void play_game() {
         delay(200);  // Small delay so that all the serial data can be sent
 
         // Receive opponent selected tiles
-        // This is a string array of the enemy's ships
+        // This is an array of strings of the enemy's ships
         opponent = client.receive_ships(squares_allowed);
 
         // assigns the boat IDs to my enemy's boat
         // print to serial-mon for confirmation
         input_enemy_boat_id(opponent, game_arr, squares_allowed);
+        if (debug == true){
+          // Print enemy gamestate to serial-mon for debugging
+          print_blocks_4(game_arr);
+        }
 
         // Update own blocks and enemy blocks
         for (int i = 0; i < squares_allowed; i++) {
@@ -300,10 +322,15 @@ void play_game() {
         // If the block has already been selected, remove it from the list.
         if (pos == selected[0]) {
           if (pos == "") {   // If we get a mistouch, restart the loop
-            Serial.println("mistouch");
+            if (debug == true) {
+              Serial.println("Mistouch"); // confirm we had a mistouch
+            }
             continue;
           }
-          Serial.println(selected[0]);
+
+          if (debug == true) {
+            Serial.println(selected[0]);  // print the block we selected
+          }
 
           // Draw black so the user knows we've removed it
           draw_at_grid_pos(tft, BOXSIZE, selected[0], ILI9341_BLACK);
@@ -324,7 +351,9 @@ void play_game() {
           if (game_arr[determine_array_element(pos)].getEnemy() == 0 ||
               game_arr[determine_array_element(pos)].getEnemy() == 8) {
             selected[0] =  pos;  // Store the grid position in our array
-            Serial.println(selected[0]);
+            if (debug == true) {
+              Serial.println(selected[0]);  // print the block we selected
+            }
 
             // Draw green so the user knows we've registered their press
             draw_at_grid_pos(tft, BOXSIZE, pos, ILI9341_GREEN);
@@ -382,6 +411,14 @@ void play_game() {
         // if yes, convert the states to display the proper colour
         check_if_enemy_boat_sunk(game_arr);
         check_if_my_boat_sunk(game_arr);
+
+        if (debug == true){
+          // Print the game states to serial-mon for debugging
+          print_blocks_2(game_arr);
+          delay(50);
+          print_blocks(game_arr);
+          delay(50);
+        }
 
         // Check if you have lost or your enemy has lost
         // and set gamestate to 3 if it is
