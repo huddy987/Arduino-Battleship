@@ -11,7 +11,7 @@ simultaneously guessing a square to "shoot" their opponent's boats. The game
 ends when one or both players have all their battleships sunk.
 
 ## CODE INSTRUCTIONS
-1. Simplify upload to an Arduino Mega.
+1. Simply upload to an Arduino Mega.
 
 ## HARDWARE REQUIREMENTS:
 2 x Arduino MEGA 2560
