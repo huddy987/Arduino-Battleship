@@ -1,9 +1,8 @@
-Name: Hudson Shykowski & Dale Richmond Naviza
-ID : 1534579 & 1520045
-CMPUT 274, Fall 2018
-Final Project: Arduino Battleship
+# Arduino Battleship
 
-Included Files:
+## By Hudson https://github.com/huddy987 and Richmond https://github.com/naviza
+
+## Included Files:
 - battleship.cpp
 - block.cpp
 - block.h
@@ -23,35 +22,35 @@ Included Files:
 - touch_handler.h
 
 
-CODE INSTRUCTIONS
+## CODE INSTRUCTIONS
 1. On the terminal, go to the folder directory of battleship
 2. type in the following to compile and upload the code on one Arduino
     b. $ make upload
 
-HARDWARE REQUIREMENTS:
+## HARDWARE REQUIREMENTS:
 2 x Arduino MEGA 2560
 2 x Adafruit 2.4" TFT LCD (ILI9341)
 2 x breadboard
 25 x wires
 
 
-KNOWN ISSUES:
+## KNOWN ISSUES:
 If both players send boats at the same time, null data is sent over.
 
 
-RESOURCES:
+## RESOURCES:
 https://learn.adafruit.com/adafruit-2-4-color-tft-touchscreen-breakout/spi-wiring-test
 https://learn.adafruit.com/adafruit-gfx-graphics-library/graphics-primitives
 
 
-ACKNOWLEDGEMENTS:
+## ACKNOWLEDGEMENTS:
 The set up of the touchscreen display was inspired by code from the adafruit tutorials that showed how to set up and
 calibrate the screen. Code was written using adafruit libraries alongside the arduino library. Other than that,
 all code was written from scratch by us.
 
 
 
-WIRING:
+## WIRING:
 
 GND <--> DISPLAY GND
 
@@ -83,7 +82,7 @@ ARDUINO 1 GND <--> ARDUINO 2 GND
 
 
 
-SCREEN DIAGRAM FOR REFERENCE (VARIABLES FOLLOW THIS GRID):
+## SCREEN DIAGRAM FOR REFERENCE (VARIABLES FOLLOW THIS GRID):
 
 Ex: A5 is the top left corner of the grid.
 
