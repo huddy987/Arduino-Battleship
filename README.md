@@ -2,30 +2,16 @@
 
 ## By Hudson https://github.com/huddy987 and Richmond https://github.com/naviza
 
-## Included Files:
-- battleship.cpp
-- block.cpp
-- block.h
-- boat_id.cpp
-- boat_id.h
-- client.cpp
-- client.h
-- data_handler.cpp
-- data_handler.h
-- draw_handler.cpp
-- draw_handler.h
-- game.cpp
-- game.h
-- Makefile
-- README
-- touch_handler.cpp
-- touch_handler.h
-
+## Description:
+Arduino rendition of the popular Hasbro boardgame "Battlesgip". Written in C++ for
+2 Arduinos using the Adafruit 2.4" touchscreen display.
+Players begin the game by picking a boat of length 5, a boat of length 4,
+and a boat of length 3. Once both players have selected their boats, they take turns by
+simultaneously guessing a square to "shoot" their opponent's boats. The game
+ends when one or both players have all their battleships sunk.
 
 ## CODE INSTRUCTIONS
-1. On the terminal, go to the folder directory of battleship
-2. type in the following to compile and upload the code on one Arduino
-    b. $ make upload
+1. Simplify upload to an Arduino Mega.
 
 ## HARDWARE REQUIREMENTS:
 2 x Arduino MEGA 2560
