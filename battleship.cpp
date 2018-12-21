@@ -10,6 +10,8 @@
 #include "./data_handler.h"  // Block class and data handling functions
 #include "./boat_id.h"
 
+// Debug flag
+bool debug = false;
 
 // These are the four touchscreen analog pins
 #define YP A10  // must be an analog pin, use "An" notation!
@@ -172,6 +174,10 @@ void play_game() {
         // If a block has already been selected restart the loop
         for (int i = 0; i < squares_allowed; i++) {
           if (pos == selected[i]) {
+            if(debug == true){
+              // Print the grid position if we are in debug mode
+              Serial.println(selected[i]);
+            }
             already_selected = 1;
             break;
           }
@@ -199,6 +205,11 @@ void play_game() {
 
 
           if (block_is_allowed) {
+            if(debug == true){
+              // Print the grid position if we are in debug mode
+              Serial.println(selected[squares_selected]);
+            }
+
             // Draw green so the user knows we've registered their press
             draw_at_grid_pos(tft, BOXSIZE, pos, ILI9341_GREEN);
 
@@ -211,7 +222,6 @@ void play_game() {
             // if block is not allowed remove it from the array of blocks
             selected[squares_selected] =  "";
           }
-
 
           // Restart loop (need to do it this way to
           // allow deselecting when there are 5 tiles)
@@ -226,6 +236,11 @@ void play_game() {
             // when the user is done inputting blocks, input the boat ID's
             // print to serial-mon for confirmation
             input_boat_id(selected, game_arr, squares_allowed);
+
+            if (debug == true){
+              // Print self gamestate to serial-mon for debugging
+              print_blocks_3(game_arr);
+            }
         }
 
         // If confirm is not selected, restart the loop (wait)
@@ -250,6 +265,10 @@ void play_game() {
         // assigns the boat IDs to my enemy's boat
         // print to serial-mon for confirmation
         input_enemy_boat_id(opponent, game_arr, squares_allowed);
+        if (debug == true){
+          // Print enemy gamestate to serial-mon for debugging
+          print_blocks_4(game_arr);
+        }
 
         // Update own blocks and enemy blocks
         for (int i = 0; i < squares_allowed; i++) {
@@ -303,7 +322,14 @@ void play_game() {
         // If the block has already been selected, remove it from the list.
         if (pos == selected[0]) {
           if (pos == "") {   // If we get a mistouch, restart the loop
+            if (debug == true) {
+              Serial.println("Mistouch"); // confirm we had a mistouch
+            }
             continue;
+          }
+
+          if (debug == true) {
+            Serial.println(selected[0]);  // print the block we selected
           }
 
           // Draw black so the user knows we've removed it
@@ -325,6 +351,9 @@ void play_game() {
           if (game_arr[determine_array_element(pos)].getEnemy() == 0 ||
               game_arr[determine_array_element(pos)].getEnemy() == 8) {
             selected[0] =  pos;  // Store the grid position in our array
+            if (debug == true) {
+              Serial.println(selected[0]);  // print the block we selected
+            }
 
             // Draw green so the user knows we've registered their press
             draw_at_grid_pos(tft, BOXSIZE, pos, ILI9341_GREEN);
@@ -382,6 +411,14 @@ void play_game() {
         // if yes, convert the states to display the proper colour
         check_if_enemy_boat_sunk(game_arr);
         check_if_my_boat_sunk(game_arr);
+
+        if (debug == true){
+          // Print the game states to serial-mon for debugging
+          print_blocks_2(game_arr);
+          delay(50);
+          print_blocks(game_arr);
+          delay(50);
+        }
 
         // Check if you have lost or your enemy has lost
         // and set gamestate to 3 if it is

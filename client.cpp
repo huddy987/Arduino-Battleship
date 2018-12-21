@@ -56,7 +56,7 @@ String *Client::receive_ships(int length) {
       }
       if (counter == 2) {  // If we have read 2 characters
         opponent_ships[current_index] = tile;
-        Serial.println(opponent_ships[current_index]);
+        Serial.println(opponent_ships[current_index]); // prints block(s) received for debugging
         tile = "";  // Reset the string
         current_index++;  // Increment the counter
         counter = 0;

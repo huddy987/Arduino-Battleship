@@ -266,14 +266,14 @@ int first_contact(String block_arr[], int squares_selected,
     case 1:
     case 6:
     case 10:
-      Serial.println("First block of the boat: ");
+      // Serial.println("First block of the boat: "); for debugging
       return(1);
 
     // second block of the boat
     case 2:
     case 7:
     case 11:
-      Serial.println("Second block of the boat");
+      // Serial.println("Second block of the boat"); for debugging
       return(valid_second_block(block_arr[holder], block_arr[holder + 1]));
 
     // third block of the boat
