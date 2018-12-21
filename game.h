@@ -22,12 +22,12 @@ class Game{
     int _mode;
     int _player_isalive;
   public:
-    
+
     // Object constructor
     Game(int user_state, int game_mode);
 
     // Returns the game mode
-    int get_mode();
+    int get_game_mode();
 
     // Checks the game mode (when at main menu)
     int update_game_mode(Adafruit_ILI9341 display, TSPoint point);

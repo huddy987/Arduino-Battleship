@@ -19,11 +19,6 @@ ends when one or both players have all their battleships sunk.
 2 x breadboard
 25 x wires
 
-
-## KNOWN ISSUES:
-If both players send boats at the same time, null data is sent over.
-
-
 ## RESOURCES:
 https://learn.adafruit.com/adafruit-2-4-color-tft-touchscreen-breakout/spi-wiring-test
 https://learn.adafruit.com/adafruit-gfx-graphics-library/graphics-primitives

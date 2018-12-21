@@ -17,17 +17,17 @@ int Game::get_state() {
 }
 
 // Returns the game mode
-int Game::get_mode() {
+int Game::get_game_mode() {
   return _mode;
 }
 
 // Check how many players are selected and go to appropriate game mode
 // Returns 1 if single player is selected, returns 2 if 2 player is selected
 int Game::update_game_mode(Adafruit_ILI9341 display, TSPoint point) {
-  if (point.y < 120) {
+  if (point.y <= 130) { // Shifted over from 120 to 130 because of screen calibration
     // 1 player mode is selected
     _mode = 1;
-  } else if (point.y > 120) {
+  } else if (point.y > 130) {
     // 2 player mode is selected
     _mode = 2;
   } else {

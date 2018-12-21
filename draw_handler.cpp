@@ -53,7 +53,6 @@ void draw_menu(Adafruit_ILI9341 display) {
 }
 
 // Draw menu for # of players selection
-// Unused, will be useful if we decide to implement an AI later
 void draw_menu_mode(Adafruit_ILI9341 display) {
   int char_size = 10;
   // Need to do this to rotate text
