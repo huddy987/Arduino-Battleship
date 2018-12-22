@@ -10,8 +10,55 @@
 #include "./data_handler.h"  // Block class and data handling functions
 #include "./boat_id.h"
 
+// Determine the blocks that should be selected after the first random selection
+String ai_pick_block(String opponent_ships[]){
+  Serial.println("dhsdkjsa");
+  return "test";
+}
+
+// Determine which direction to go in.
+// LEGEND FOR DIRECTION NOTATION:
+
+//  (ARDUINO BREADBOARD IS UP HERE)
+//               0
+//               ^
+//               |
+//       3 <  ---.---  > 1
+//               |
+//               v
+//               2
+
+int direction(String root){
+  if (root == "A0"){
+    // Either go up or right
+    return random(0, 1);
+  }
+  if (root == "A5"){
+    // Either go down or right
+    return random(1, 2);
+  }
+  if (root == "G5"){
+    // Either go down or left
+    return random(2, 3);
+  }
+  if (root == "G0"){
+    // Either go up or left
+    int selection = random(0, 1);
+    if (selection == 0){
+      return 0;
+    }
+    else{
+      return 3;
+    }
+  }
+  else{
+    // We are somewhere not along the edges, pick any direction.
+    return random(0, 3);
+  }
+}
+
 // Return AI-selected tiles
-String *ai_pick_positions() {
+String *ai_pick_boats() {
   // 5 + 4 + 3 boats makes 12 tiles
   String *opponent_ships = new String[12];
 
@@ -19,7 +66,17 @@ String *ai_pick_positions() {
   char let[7] = {'A', 'B', 'C', 'D', 'E', 'F', 'G'};
   char num[6] = {'0', '1', '2', '3', '4', '5'};
 
-  // TODO: pick a boat of length 5
+  // Pick a boat of length 5
+  // pick a "root" block
+  opponent_ships[0] = String(let[random(0, 7)]) + String(num[random(0, 6)]);
+
+  // pick a direction to go in based off of the root tile
+  int dir = direction(opponent_ships[0]);
+
+  // pick all other blocks based off of the root and direction
+  for (int i = 1; i < 5; i++){
+    opponent_ships[i] = ai_pick_block(opponent_ships);
+  }
 
   // TODO: pick a boat of length 4
 

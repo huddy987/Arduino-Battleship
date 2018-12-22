@@ -622,7 +622,7 @@ void play_game_solo() {
         }
 
         // "Receive" boats from the AI
-        opponent = ai_pick_positions();
+        opponent = ai_pick_boats();
 
         // assigns the boat IDs to my enemy's boat
         // print to serial-mon for confirmation
