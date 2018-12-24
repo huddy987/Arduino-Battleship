@@ -14,6 +14,9 @@
 // Debug flag
 bool debug = true;
 
+// flag to turn off animations
+bool animations = false;
+
 // These are the four touchscreen analog pins
 #define YP A10  // must be an analog pin, use "An" notation!
 #define XM A11  // must be an analog pin, use "An" notation!
@@ -66,6 +69,8 @@ void setup_arduino() {
   Serial3.begin(9600);
   // Serial-mon message confirming that the arduinos are working properly
   Serial.println("Welcome to Battleship!");
+
+  randomSeed(analogRead(0));  // set a random seed
 
   tft.begin();
   // Draw menu
@@ -199,7 +204,7 @@ void play_game() {
           if (pos == selected[i]) {
             if(debug == true){
               // Print the grid position if we are in debug mode
-              Serial.println(selected[i]);
+              Serial.println("Tile selected: " + selected[i]);
             }
             already_selected = 1;
             break;
@@ -230,7 +235,7 @@ void play_game() {
           if (block_is_allowed) {
             if(debug == true){
               // Print the grid position if we are in debug mode
-              Serial.println(selected[squares_selected]);
+              Serial.println("Tile selected: " + selected[squares_selected]);
             }
 
             // Draw green so the user knows we've registered their press
@@ -352,7 +357,7 @@ void play_game() {
           }
 
           if (debug == true) {
-            Serial.println(selected[0]);  // print the block we selected
+            Serial.println("Tile deselected: " + selected[0]);  // print the block we selected
           }
 
           // Draw black so the user knows we've removed it
@@ -375,7 +380,7 @@ void play_game() {
               game_arr[determine_array_element(pos)].getEnemy() == 8) {
             selected[0] =  pos;  // Store the grid position in our array
             if (debug == true) {
-              Serial.println(selected[0]);  // print the block we selected
+              Serial.println("Tile selected: " + selected[0]);  // print the block we selected
             }
 
             // Draw green so the user knows we've registered their press
@@ -448,13 +453,13 @@ void play_game() {
         }
 
         // If no one has lost, draw your own map (updated)
-        draw_board_self(tft, BOXSIZE, game_arr, opponent);
+        draw_board_self(tft, BOXSIZE, game_arr, opponent, animations);
 
         // Wait until a touch is registered before continuing
         wait_for_touch(tft, ts, MINPRESSURE);
 
         // Show your opponents map (updated)
-        draw_board_enemy(tft, BOXSIZE, game_arr, &selected[0]);
+        draw_board_enemy(tft, BOXSIZE, game_arr, &selected[0], animations);
 
         // Reset our variables to 0 so we can reuse them in the next loop
         Serial3.flush();  // Ensure there is no garbage in the serial3 buffer
@@ -487,6 +492,18 @@ void play_game_solo() {
 
   // Opponent block array
   String *opponent;
+
+  // AI memory of previous shot
+  String AI_last_shot = *opponent;
+
+  // AI memory of "root" shot
+  String root = NULL;
+
+  // AI direction of next shot
+  int direction = NULL;
+
+  // AI temporary direction
+  int temp_direction = NULL;
 
   // Flag for checking if a block has already been selected
   int already_selected = 0;
@@ -549,7 +566,7 @@ void play_game_solo() {
           if (pos == selected[i]) {
             if(debug == true){
               // Print the grid position if we are in debug mode
-              Serial.println(selected[i]);
+              Serial.println("Tile selected: " + selected[i]);
             }
             already_selected = 1;
             break;
@@ -580,7 +597,7 @@ void play_game_solo() {
           if (block_is_allowed) {
             if(debug == true){
               // Print the grid position if we are in debug mode
-              Serial.println(selected[squares_selected]);
+              Serial.println("Tile selected: " + selected[squares_selected]);
             }
 
             // Draw green so the user knows we've registered their press
@@ -689,7 +706,7 @@ void play_game_solo() {
           }
 
           if (debug == true) {
-            Serial.println(selected[0]);  // print the block we selected
+            Serial.println("Tile deselected: " + selected[0]);  // print the block we selected
           }
 
           // Draw black so the user knows we've removed it
@@ -712,7 +729,7 @@ void play_game_solo() {
               game_arr[determine_array_element(pos)].getEnemy() == 8) {
             selected[0] =  pos;  // Store the grid position in our array
             if (debug == true) {
-              Serial.println(selected[0]);  // print the block we selected
+              Serial.println("Tile selected: " + selected[0]);  // print the block we selected
             }
 
             // Draw green so the user knows we've registered their press
@@ -738,8 +755,76 @@ void play_game_solo() {
         // Change menu to confirm button once all tiles are selected
         draw_green_confirm(tft, BOXSIZE);
 
+        if (debug == true){  // debugging last shot
+          Serial.println("Last shot is: " + AI_last_shot);
+        }
+
+        if (root){
+          // Remove the root if a boat is sunk
+          if (game_arr[determine_array_element(AI_last_shot)].getBlock() == 4){
+            root = NULL;
+
+            if (debug == true){
+              Serial.println("Boat sunk; root removed.");
+            }
+          }
+        }
+
         // "Receive" a single block from the AI
-        opponent = ai_take_shot(game_arr);
+        opponent = ai_take_shot(game_arr, AI_last_shot, root, direction);
+
+        // Save our previous shot so we can make an educated shot next time
+        AI_last_shot = *opponent;
+
+        // Set to root if there isn't one under certain conditions
+        if (not root){
+
+          // Set a root if there is not already a root and we hit a boat
+          if (game_arr[determine_array_element(*opponent)].getBlock() == 2){
+            root = *opponent;
+
+            if (debug == true){
+              Serial.println("Root is: " + root);
+            }
+          }
+
+          // Set to root if we hit a boat in the past and somehow it was set off of root (edge case)
+          for (int i = 0; i < 43; i++){
+
+            // TODO: If a root is surrounded by "shot" tiles, skip candidate
+            if (game_arr[i].getBlock() == 3){
+              root = determine_block(i);
+
+              if (debug == true){
+                Serial.println("Root is: " + root);
+              }
+              break;
+            }
+          }
+        }
+
+        if (root){
+          // Choose a direction if the last shot was the root
+          // or if we have a root and our last shot missed
+          if ((root == AI_last_shot) or (game_arr[determine_array_element(AI_last_shot)].getBlock() == 0)){
+            // Continually choose directions until one is chosen that isn't the same as the old one.
+            while(true){
+              temp_direction = choose_direction(root);
+              if (temp_direction != direction){
+                direction = temp_direction;
+                break;
+              }
+            }
+
+            if (debug == true){ // if in debug mode, print the new direction to serial mon
+              Serial.print("Direction was reset, new direction is: ");
+              Serial.println(String(direction));
+            }
+
+            AI_last_shot = root;  // set AI_last_shot to root to "reset" the shooting algorithm
+                                  // to reference the next shot from the root
+          }
+        }
 
         // Update enemy blocks with what you selected
         game_arr[determine_array_element(selected[
@@ -771,16 +856,15 @@ void play_game_solo() {
         }
 
         // If no one has lost, draw your own map (updated)
-        draw_board_self(tft, BOXSIZE, game_arr, opponent);
+        draw_board_self(tft, BOXSIZE, game_arr, opponent, animations);
 
         // Wait until a touch is registered before continuing
         wait_for_touch(tft, ts, MINPRESSURE);
 
         // Show your opponents map (updated)
-        draw_board_enemy(tft, BOXSIZE, game_arr, &selected[0]);
+        draw_board_enemy(tft, BOXSIZE, game_arr, &selected[0], animations);
 
         // Reset our variables to 0 so we can reuse them in the next loop
-        Serial3.flush();  // Ensure there is no garbage in the serial3 buffer
         squares_selected = 0;  // Reset the squares selected counter to 0
         selected[0] = "";
         opponent[0] = "";  // Remove the entry from the opponent's list

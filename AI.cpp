@@ -12,7 +12,6 @@
 
 // Determine the blocks that should be selected after the first random selection
 String ai_pick_block(String opponent_ships[]){
-  Serial.println("dhsdkjsa");
   return "test";
 }
 
@@ -28,7 +27,7 @@ String ai_pick_block(String opponent_ships[]){
 //               v
 //               2
 
-int direction(String root){
+int choose_direction(String root){
   if (root == "A0"){
     // Either go up or right
     return random(0, 1);
@@ -71,7 +70,7 @@ String *ai_pick_boats() {
   opponent_ships[0] = String(let[random(0, 7)]) + String(num[random(0, 6)]);
 
   // pick a direction to go in based off of the root tile
-  int dir = direction(opponent_ships[0]);
+  //int dir = choose_direction(opponent_ships[0]);
 
   // pick all other blocks based off of the root and direction
   for (int i = 1; i < 5; i++){
@@ -102,7 +101,7 @@ String *ai_pick_boats() {
 }
 
 // Choose a position to shoot the enemy at.
-String *ai_take_shot(Block game_arr[]) {
+String *ai_take_shot(Block game_arr[], String AI_last_shot, String root, int direction) {
   // only 1 selection will be made
   String *shot_position = new String[1];
 
@@ -110,17 +109,114 @@ String *ai_take_shot(Block game_arr[]) {
   char let[7] = {'A', 'B', 'C', 'D', 'E', 'F', 'G'};
   char num[6] = {'0', '1', '2', '3', '4', '5'};
 
-  // TODO: Make tile picking more robust
+  // Fail safe counter if for some reason we loop in cases 0-4 for the root case
+  int loop_flag = 0;
 
   // Continually pick tiles until we pick a valid one
-  while (true){
-    shot_position[0] = String(let[random(0, 7)]) + String(num[random(0, 6)]);
+  while (true) {
 
-    // If the chosen block is either 0 (undisturbed) or 2 (boat hidden) take the shot
-    if (game_arr[determine_array_element(shot_position[0])].getBlock() == 0 ||
-        game_arr[determine_array_element(shot_position[0])].getBlock() == 2) {
-          break;
+    // If there is no root, randomly choose a tile until a valid one is chosen.
+    if (not root) {
+      Serial.println("No root.");
+      shot_position[0] = String(let[random(0, 7)]) + String(num[random(0, 6)]);
+
+      // If the chosen block is either 0 (undisturbed) or 2 (boat hidden) take the shot
+      if (game_arr[determine_array_element(shot_position[0])].getBlock() == 0 ||
+          game_arr[determine_array_element(shot_position[0])].getBlock() == 2) {
+            return shot_position;
+      }
+    }
+    else {
+      switch (direction){
+
+        case 0:   // shoot up from the last shot
+          Serial.println("Case 0");
+
+          // Need this in case we recurse
+          if(AI_last_shot[1] != '5'){
+
+            // Find the index of the element in num and assign the shot to [let][num+1]
+            for(int i = 0; i < 6; i++){
+              if(AI_last_shot[1] == num[i]){
+                shot_position[0] = AI_last_shot[0] + String(num[i+1]);
+              }
+            }
+
+            // If the chosen block is either 0 (undisturbed) or 2 (boat hidden) take the shot
+            if (game_arr[determine_array_element(shot_position[0])].getBlock() == 0 ||
+                game_arr[determine_array_element(shot_position[0])].getBlock() == 2) {
+                  return shot_position;
+            }
+          }
+
+        case 1:   // shoot right from the last shot
+          Serial.println("Case 1");
+
+          // Need this in case we drop down from case 0 (skips if we have a G previous shot)
+          if(AI_last_shot[0] != 'G'){
+
+            // Find the index of the element in let and assign the shot to [let+1][num]
+            for(int i = 0; i < 7; i++){
+              if(AI_last_shot[0] == let[i]){
+                shot_position[0] = String(let[i+1]) + AI_last_shot[1];
+              }
+            }
+
+            // If the chosen block is either 0 (undisturbed) or 2 (boat hidden) take the shot
+            if (game_arr[determine_array_element(shot_position[0])].getBlock() == 0 ||
+                game_arr[determine_array_element(shot_position[0])].getBlock() == 2) {
+                  return shot_position;
+            }
+          }
+
+        case 2:   // shoot down from the last shot
+          Serial.println("Case 2");
+
+          // Need this in case we drop down from case 1 (skips if we have a 0 previous shot)
+          if(AI_last_shot[1] != '0'){
+
+            // Find the index of the element in let and assign the shot to [let][num - 1]
+            for(int i = 0; i < 6; i++){
+              if(AI_last_shot[1] == num[i]){
+                shot_position[0] = AI_last_shot[0] + String(num[i-1]);
+              }
+            }
+
+            // If the chosen block is either 0 (undisturbed) or 2 (boat hidden) take the shot
+            if (game_arr[determine_array_element(shot_position[0])].getBlock() == 0 ||
+                game_arr[determine_array_element(shot_position[0])].getBlock() == 2) {
+                  return shot_position;
+            }
+          }
+
+        case 3:   // shoot left from the last shot
+          Serial.println("Case 3");
+
+        // Need this in case we drop down from case 2 (skips if we have an A previous shot)
+        if(AI_last_shot[0] != 'A'){
+
+          // Find the index of the element in let and assign the shot to [let][num - 1]
+          for(int i = 0; i < 7; i++){
+            if(AI_last_shot[0] == let[i]){
+              shot_position[0] = String(let[i-1]) + AI_last_shot[1];
+            }
+          }
+
+          // If the chosen block is either 0 (undisturbed) or 2 (boat hidden) take the shot
+          if (game_arr[determine_array_element(shot_position[0])].getBlock() == 0 ||
+              game_arr[determine_array_element(shot_position[0])].getBlock() == 2) {
+                return shot_position;
+          }
         }
+        if (loop_flag = 1){
+          root = NULL;
+        }
+        // This is an edge case. Set direction to 0 and try again. Set flag to
+        // 1 in case this fails and pick randomly (base case)
+        direction = 0;
+        loop_flag = 1;
+      }
+    }
   }
 
   return shot_position;

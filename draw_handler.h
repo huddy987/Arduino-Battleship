@@ -44,10 +44,10 @@ void blink_block(Adafruit_ILI9341 display, int BOXSIZE, Block play_arr[], String
 void draw_opponent_message(Adafruit_ILI9341 display);
 
 // Draws appropriate color at every grid position on our own board
-void draw_board_self(Adafruit_ILI9341 display, int BOXSIZE, Block play_arr[], String *opponent_selection);
+void draw_board_self(Adafruit_ILI9341 display, int BOXSIZE, Block play_arr[], String *opponent_selection, bool animations);
 
 // Draws appropriate color at every grid position on the enemy's board
-void draw_board_enemy(Adafruit_ILI9341 display, int BOXSIZE, Block play_arr[], String *my_selection);
+void draw_board_enemy(Adafruit_ILI9341 display, int BOXSIZE, Block play_arr[], String *my_selection, bool animations);
 
 // draws the prompt for the user to select the appropriate amount of blocks to be selected
 void draw_select(Adafruit_ILI9341 display, int BOXSIZE, String message);

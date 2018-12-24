@@ -246,7 +246,7 @@ void draw_opponent_message(Adafruit_ILI9341 display) {
 
 // Draws appropriate color at every grid position on our own board
 void draw_board_self(Adafruit_ILI9341 display,
-  int BOXSIZE, Block play_arr[], String *opponent_selection) {
+  int BOXSIZE, Block play_arr[], String *opponent_selection, bool animations) {
   // Need to do this to rotate to standard game rotations as
   // specified in readme (after main menu).
   display.setRotation(0);
@@ -257,20 +257,24 @@ void draw_board_self(Adafruit_ILI9341 display,
   }
   // Draw the word "opponent" to know that it's our opponent's shot
   draw_opponent_message(display);
-  // Blink the last the opponent shot block 2 times
-  blink_block(display, BOXSIZE, play_arr, opponent_selection, 2, 0);
+  // Blink the last the opponent shot block 2 times if animations are turned on
+  if (animations == true){
+    blink_block(display, BOXSIZE, play_arr, opponent_selection, 2, 0);
+  }
 }
 
 // Draws appropriate color at every grid position on the enemy's board
 void draw_board_enemy(Adafruit_ILI9341 display, int BOXSIZE,
-  Block play_arr[], String *my_selection) {
+  Block play_arr[], String *my_selection, bool animations) {
   draw_empty_map(display, BOXSIZE);
   for (int i = 0; i < 42; i++) {
     // Draw the state for each self block
     draw_state(display, BOXSIZE, determine_block(i), play_arr[i].getEnemy());
   }
-  // Blink the last block I shot 1 time
-  blink_block(display, BOXSIZE, play_arr, my_selection, 1, 1);
+  // Blink the last block I shot 1 time if animations are turned on
+  if (animations == true){
+    blink_block(display, BOXSIZE, play_arr, my_selection, 1, 1);
+  }
 }
 
 /*
