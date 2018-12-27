@@ -99,7 +99,7 @@ String determine_block(uint8_t block_number) {
 // Prints the user's block states
 void print_blocks(Block player_array[]) {
   Serial.println();
-  Serial.println("My Block States");
+  Serial.println("My Block States:");
   for (int i = 1; i < 43; i++) {
     if ((i%7) == 0) {Serial.print((*(player_array +
       i - 1)).getBlock()); Serial.println();
@@ -113,7 +113,7 @@ void print_blocks(Block player_array[]) {
 // Prints the enemy's block states from the user's POV
 void print_blocks_2(Block player_array[]) {
   Serial.println();
-  Serial.println("Enemy States");
+  Serial.println("Enemy Block states:");
   for (int i = 1; i < 43; i++) {
     if ((i%7) == 0) {
       Serial.print((*(player_array + i -1)).getEnemy());
@@ -128,7 +128,7 @@ void print_blocks_2(Block player_array[]) {
 // Prints the user's boat id
 void print_blocks_3(Block player_array[]) {
   Serial.println();
-  Serial.println("My Boat ID's");
+  Serial.println("My Boat IDs:");
   for (int i = 1; i < 43; i++) {
     if ((i%7) == 0) {
       Serial.print((*(player_array + i - 1)).getBoat());
@@ -143,7 +143,7 @@ void print_blocks_3(Block player_array[]) {
 // Print the enemy's boat id
 void print_blocks_4(Block player_array[]) {
   Serial.println();
-  Serial.println("My Enemy's Boat ID's");
+  Serial.println("My Enemy's Boat IDs:");
   for (int i = 1; i < 43; i++) {
     if ((i%7) == 0) {
       Serial.print((*(player_array + i - 1)).getEnemyBoat());

@@ -10,19 +10,17 @@ and a boat of length 3. Once both players have selected their boats, they take t
 simultaneously guessing a square to "shoot" their opponent's boats. The game
 ends when one or both players have all their battleships sunk.
 
+This game also features a 1 player mode, where a single arduino plays against the computer with the same ruleset.
+
 ## CODE INSTRUCTIONS
-1. Simply upload to an Arduino Mega.
+1. Wire two Arduino Megas as specified below.
+2. Simply upload to the Arduino Megas.
 
 ## HARDWARE REQUIREMENTS:
 2 x Arduino MEGA 2560
 2 x Adafruit 2.4" TFT LCD (ILI9341)
 2 x breadboard
 25 x wires
-
-
-## KNOWN ISSUES:
-If both players send boats at the same time, null data is sent over.
-
 
 ## RESOURCES:
 https://learn.adafruit.com/adafruit-2-4-color-tft-touchscreen-breakout/spi-wiring-test

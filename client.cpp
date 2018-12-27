@@ -46,9 +46,7 @@ String *Client::receive_ships(int length) {
   String tile;
   while (true) {  // Constantly read bytes
     // If our counter is equal to the desired length, break
-    if (current_index == (length)) {
-      break;
-    } else {
+    if (Serial3.available()){
       char byte = Serial3.read();
       if (counter < 2) {
         tile = String(tile + byte);  // Append the read byte to the tile
@@ -56,10 +54,13 @@ String *Client::receive_ships(int length) {
       }
       if (counter == 2) {  // If we have read 2 characters
         opponent_ships[current_index] = tile;
-        Serial.println(opponent_ships[current_index]); // prints block(s) received for debugging
+        // Serial.println(opponent_ships[current_index]); // prints block(s) received for debugging
         tile = "";  // Reset the string
         current_index++;  // Increment the counter
         counter = 0;
+      }
+      if (current_index == (length)) {
+        break;
       }
     }
   }
