@@ -12,10 +12,13 @@
 #include "./AI.h"
 
 // Debug flag
-bool debug = true;
+bool debug = false;
+
+// Super debug flag
+bool super_debug = false;
 
 // flag to turn off animations
-bool animations = false;
+bool animations = true;
 
 // These are the four touchscreen analog pins
 #define YP A10  // must be an analog pin, use "An" notation!
@@ -265,7 +268,7 @@ void play_game() {
             // print to serial-mon for confirmation
             input_boat_id(selected, game_arr, squares_allowed);
 
-            if (debug == true){
+            if (super_debug == true){
               // Print self gamestate to serial-mon for debugging
               print_blocks_3(game_arr);
             }
@@ -293,7 +296,7 @@ void play_game() {
         // assigns the boat IDs to my enemy's boat
         // print to serial-mon for confirmation
         input_enemy_boat_id(opponent, game_arr, squares_allowed);
-        if (debug == true){
+        if (super_debug == true){
           // Print enemy gamestate to serial-mon for debugging
           print_blocks_4(game_arr);
         }
@@ -438,7 +441,7 @@ void play_game() {
         check_if_enemy_boat_sunk(game_arr);
         check_if_my_boat_sunk(game_arr);
 
-        if (debug == true){
+        if (super_debug == true){
           // Print the game states to serial-mon for debugging
           print_blocks_2(game_arr);
           delay(50);
@@ -627,7 +630,7 @@ void play_game_solo() {
             // print to serial-mon for confirmation
             input_boat_id(selected, game_arr, squares_allowed);
 
-            if (debug == true){
+            if (super_debug == true){
               // Print self gamestate to serial-mon for debugging
               print_blocks_3(game_arr);
             }
@@ -644,7 +647,7 @@ void play_game_solo() {
         // assigns the boat IDs to my enemy's boat
         // print to serial-mon for confirmation
         input_enemy_boat_id(opponent, game_arr, squares_allowed);
-        if (debug == true){
+        if (super_debug == true){
           // Print enemy gamestate to serial-mon for debugging
           print_blocks_4(game_arr);
         }
@@ -761,8 +764,10 @@ void play_game_solo() {
 
         if (root){
           // Remove the root if a boat is sunk
+          // Also reset direction to NULL so we can randomly pick a direction next time
           if (game_arr[determine_array_element(AI_last_shot)].getBlock() == 4){
             root = NULL;
+            direction = NULL;
 
             if (debug == true){
               Serial.println("Boat sunk; root removed.");
@@ -791,14 +796,20 @@ void play_game_solo() {
           // Set to root if we hit a boat in the past and somehow it was set off of root (edge case)
           for (int i = 0; i < 43; i++){
 
-            // TODO: If a root is surrounded by "shot" tiles, skip candidate
+            // If a root is surrounded by "shot" tiles, skip candidate
             if (game_arr[i].getBlock() == 3){
-              root = determine_block(i);
+              if(game_arr[i+1].getBlock() == 0 || game_arr[i+1].getBlock() == 2 ||
+                 game_arr[i-1].getBlock() == 0 || game_arr[i-1].getBlock() == 2 ||
+                 game_arr[i+7].getBlock() == 0 || game_arr[i+7].getBlock() == 2 ||
+                 game_arr[i-7].getBlock() == 0 || game_arr[i-7].getBlock() == 2){
 
-              if (debug == true){
-                Serial.println("Root is: " + root);
-              }
-              break;
+                   root = determine_block(i);
+
+                   if (debug == true){
+                     Serial.println("Root is: " + root);
+                   }
+                   break;
+                 }
             }
           }
         }
@@ -806,10 +817,18 @@ void play_game_solo() {
         if (root){
           // Choose a direction if the last shot was the root
           // or if we have a root and our last shot missed
-          if ((root == AI_last_shot) or (game_arr[determine_array_element(AI_last_shot)].getBlock() == 0)){
+          // or if we are going to go off of the map with the next shot (based on previous position and direction)
+          if ((root == AI_last_shot) || (game_arr[determine_array_element(AI_last_shot)].getBlock() == 0)
+              || (AI_last_shot[0] == 'G' && direction == 1) || (AI_last_shot[0] == 'A' && direction == 3)
+              || (AI_last_shot[1] == '0' && direction == 2) || (AI_last_shot[1] == '5' && direction == 0)){
+
             // Continually choose directions until one is chosen that isn't the same as the old one.
             while(true){
-              temp_direction = choose_direction(root);
+              temp_direction = choose_new_direction(root, direction);
+              if (debug == true){
+                Serial.println("Picking direction");
+              }
+
               if (temp_direction != direction){
                 direction = temp_direction;
                 break;
@@ -841,7 +860,7 @@ void play_game_solo() {
         check_if_enemy_boat_sunk(game_arr);
         check_if_my_boat_sunk(game_arr);
 
-        if (debug == true){
+        if (super_debug == true){
           // Print the game states to serial-mon for debugging
           print_blocks_2(game_arr);
           delay(50);

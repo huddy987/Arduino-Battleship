@@ -27,6 +27,7 @@ String ai_pick_block(String opponent_ships[]){
 //               v
 //               2
 
+// choose a random direction
 int choose_direction(String root){
   if (root == "A0"){
     // Either go up or right
@@ -56,6 +57,202 @@ int choose_direction(String root){
   }
 }
 
+// Choose a new direction based on the old one (less random then choose_direction)
+int choose_new_direction(String root, int direction){
+  if(not direction){
+    //Serial.println("random case");
+    return choose_direction(root);
+  }
+  if (root == "A0"){
+    //Serial.println("A0 case");
+    // go up if was going down
+    if (direction == 2){
+      return 0;
+    }
+    // go right if was going left
+    if (direction == 3){
+      return 1;
+    }
+    else{
+      // if none of the cases are fullfilled, return random valid direction
+      return random(0, 1);
+    }
+  }
+  if (root == "A5"){
+    //Serial.println("A5 case");
+    // go down if was going up
+    if (direction == 0){
+      return 2;
+    }
+    // go right if was going left
+    if (direction == 3){
+      return 0;
+    }
+    else{
+      // if none of the cases are fullfilled, return random valid direction
+      int rand_int = random(0, 1);
+      if(rand_int == 0){
+        return 0;
+      }
+      else if (rand_int == 1){
+        return 2;
+      }
+    }
+  }
+  if (root == "G5"){
+    //Serial.println("G5 case");
+    // go down if was going up
+    if (direction == 0){
+      return 2;
+    }
+    // go left if was going right
+    if (direction == 1){
+      return 3;
+    }
+    else{
+      // if none of the cases are fullfilled, return random valid direction
+      return random(2, 3);
+    }
+  }
+  if (root == "G0"){
+    //Serial.println("G0 case");
+    // go up if was going down
+    if (direction == 2){
+      return 0;
+    }
+    // go left if was going right
+    if (direction == 1){
+      return 3;
+    }
+    else{
+      // if none of the cases are fullfilled, return random valid direction
+      int rand_int = random(0, 1);
+      if(rand_int == 0){
+        return 0;
+      }
+      else if (rand_int == 1){
+        return 3;
+      }
+    }
+  }
+  // General case A
+  if (root[0] == 'A'){
+    //Serial.println("A case");
+    // Go up if was going down and vice versa
+    if (direction == 2){
+      return 0;
+    }
+    if (direction == 0){
+      return 2;
+    }
+    // go right if was going left
+    if (direction == 3){
+      return 1;
+    }
+    else{
+      // if none of the cases are fullfilled, return random valid direction
+      return random(0, 2);
+    }
+  }
+
+  // General case G
+  if (root[0] == 'G'){
+    //Serial.println("G case");
+    // Go up if was going down and vice versa
+    if (direction == 2){
+      return 0;
+    }
+    if (direction == 0){
+      return 2;
+    }
+    // go left if was going right
+    if (direction == 1){
+      return 3;
+    }
+    else{
+      // if none of the cases are fullfilled, return random valid direction
+      int rand_int = random(0, 2);
+      if (rand_int == 0){
+        return 0;
+      }
+      else if (rand_int == 1){
+        return 2;
+      }
+      else if (rand_int == 2);
+      return 3;
+    }
+  }
+
+  // General case 0
+  if (root[1] == '0'){
+    //Serial.println("0 case");
+    // Go up if was going down
+    if (direction == 2){
+      return 0;
+    }
+    // go left if was going right and vice versa
+    if (direction == 1){
+      return 3;
+    }
+    if (direction == 3){
+      return 1;
+    }
+    else{
+      // if none of the cases are fullfilled, return random valid direction
+      int rand_int = random(0, 2);
+      if (rand_int == 0){
+        return 0;
+      }
+      else if (rand_int == 1){
+        return 1;
+      }
+      else if (rand_int == 2);
+      return 3;
+    }
+  }
+
+  // General case 5
+  if (root[1] == '5'){
+    //Serial.println("5 case");
+    // Go down if was going up
+    if (direction == 0){
+      return 2;
+    }
+    // go left if was going right and vice versa
+    if (direction == 1){
+      return 3;
+    }
+    if (direction == 3){
+      return 1;
+    }
+    else{
+      // if none of the cases are fullfilled, return random valid direction
+      return random(1, 3);
+    }
+  }
+
+  else if (direction){
+    //Serial.println("General case");
+    // Pick up if we were going down, left if we were going right, and vice versa
+    if (direction == 0){
+      return 2;
+    }
+    if (direction == 2){
+      return 0;
+    }
+    if (direction == 3){
+      return 1;
+    }
+    if (direction == 1){
+      return 3;
+    }
+  }
+  else{
+    //Serial.println("random (failsafe) case");
+    return choose_direction(root);
+  }
+}
+
 // Return AI-selected tiles
 String *ai_pick_boats() {
   // 5 + 4 + 3 boats makes 12 tiles
@@ -67,35 +264,69 @@ String *ai_pick_boats() {
 
   // Pick a boat of length 5
   // pick a "root" block
-  opponent_ships[0] = String(let[random(0, 7)]) + String(num[random(0, 6)]);
+  // opponent_ships[0] = String(let[random(0, 7)]) + String(num[random(0, 6)]);
 
   // pick a direction to go in based off of the root tile
   //int dir = choose_direction(opponent_ships[0]);
 
   // pick all other blocks based off of the root and direction
+  /*
   for (int i = 1; i < 5; i++){
     opponent_ships[i] = ai_pick_block(opponent_ships);
   }
+  */
+  int position = random(0, 3);
 
-  // TODO: pick a boat of length 4
-
-  // TODO: pick a boat of length 3
-
-  // For now, hardcoded:
-  opponent_ships[0] = String(let[0]) + String(num[0]);
-  opponent_ships[1] = String(let[0]) + String(num[1]);
-  opponent_ships[2] = String(let[0]) + String(num[2]);
-  opponent_ships[3] = String(let[0]) + String(num[3]);
-  opponent_ships[4] = String(let[0]) + String(num[4]);
-
-  opponent_ships[5] = String(let[1]) + String(num[0]);
-  opponent_ships[6] = String(let[2]) + String(num[0]);
-  opponent_ships[7] = String(let[3]) + String(num[0]);
-  opponent_ships[8] = String(let[4]) + String(num[0]);
-
-  opponent_ships[9] = String(let[6]) + String(num[0]);
-  opponent_ships[10] = String(let[6]) + String(num[1]);
-  opponent_ships[11] = String(let[6]) + String(num[2]);
+  switch (position){
+    case 0:
+      //Serial.println("Setup 0 chosen");
+      for (int i = 0; i < 5; i++){
+        opponent_ships[i] = String(let[0]) + String(num[i]);
+      }
+      for (int i = 5; i < 9; i++){
+        opponent_ships[i] = String(let[i - 4]) + String(num[0]);
+      }
+      for (int i = 9; i < 12; i++){
+        opponent_ships[i] = String(let[6]) + String(num[i - 9]);
+      }
+      break;
+    case 1:
+      //Serial.println("Setup 1 chosen");
+      for (int i = 0; i < 5; i++){
+        opponent_ships[i] = String(let[3]) + String(num[i]);
+      }
+      for (int i = 5; i < 9; i++){
+        opponent_ships[i] = String(let[0]) + String(num[i - 4]);
+      }
+      for (int i = 9; i < 12; i++){
+        opponent_ships[i] = String(let[6]) + String(num[i - 9]);
+      }
+      break;
+    case 2:
+      //Serial.println("Setup 2 chosen");
+      for (int i = 0; i < 5; i++){
+        opponent_ships[i] = String(let[5]) + String(num[i]);
+      }
+      for (int i = 5; i < 9; i++){
+        opponent_ships[i] = String(let[i - 4]) + String(num[5]);
+      }
+      for (int i = 9; i < 12; i++){
+        opponent_ships[i] = String(let[3]) + String(num[i - 9]);
+      }
+      break;
+    case 3:
+      //Serial.println("Setup 3 chosen");
+      for (int i = 0; i < 5; i++){
+        opponent_ships[i] = String(let[i]) + String(num[3]);
+      }
+      for (int i = 5; i < 9; i++){
+        opponent_ships[i] = String(let[i - 4]) + String(num[5]);
+      }
+      for (int i = 9; i < 12; i++){
+        opponent_ships[i] = String(let[i - 9]) + String(num[0]);
+      }
+      break;
+  }
 
   return opponent_ships;
 }
@@ -117,7 +348,7 @@ String *ai_take_shot(Block game_arr[], String AI_last_shot, String root, int dir
 
     // If there is no root, randomly choose a tile until a valid one is chosen.
     if (not root) {
-      Serial.println("No root.");
+      //Serial.println("No root.");
       shot_position[0] = String(let[random(0, 7)]) + String(num[random(0, 6)]);
 
       // If the chosen block is either 0 (undisturbed) or 2 (boat hidden) take the shot
@@ -130,7 +361,7 @@ String *ai_take_shot(Block game_arr[], String AI_last_shot, String root, int dir
       switch (direction){
 
         case 0:   // shoot up from the last shot
-          Serial.println("Case 0");
+          //Serial.println("Case 0");
 
           // Need this in case we recurse
           if(AI_last_shot[1] != '5'){
@@ -150,7 +381,7 @@ String *ai_take_shot(Block game_arr[], String AI_last_shot, String root, int dir
           }
 
         case 1:   // shoot right from the last shot
-          Serial.println("Case 1");
+          //Serial.println("Case 1");
 
           // Need this in case we drop down from case 0 (skips if we have a G previous shot)
           if(AI_last_shot[0] != 'G'){
@@ -170,7 +401,7 @@ String *ai_take_shot(Block game_arr[], String AI_last_shot, String root, int dir
           }
 
         case 2:   // shoot down from the last shot
-          Serial.println("Case 2");
+          //Serial.println("Case 2");
 
           // Need this in case we drop down from case 1 (skips if we have a 0 previous shot)
           if(AI_last_shot[1] != '0'){
@@ -190,7 +421,7 @@ String *ai_take_shot(Block game_arr[], String AI_last_shot, String root, int dir
           }
 
         case 3:   // shoot left from the last shot
-          Serial.println("Case 3");
+          //Serial.println("Case 3");
 
         // Need this in case we drop down from case 2 (skips if we have an A previous shot)
         if(AI_last_shot[0] != 'A'){
