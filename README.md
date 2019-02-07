@@ -3,7 +3,7 @@
 ## By Hudson https://github.com/huddy987 and Richmond https://github.com/naviza
 
 ## Description:
-Arduino rendition of the popular Hasbro boardgame "Battlesgip". Written in C++ for
+Arduino rendition of the popular Hasbro boardgame "Battleship". Written in C++ for
 2 Arduinos using the Adafruit 2.4" touchscreen display.
 Players begin the game by picking a boat of length 5, a boat of length 4,
 and a boat of length 3. Once both players have selected their boats, they take turns by
