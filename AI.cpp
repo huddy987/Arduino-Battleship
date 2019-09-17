@@ -10,11 +10,6 @@
 #include "./data_handler.h"  // Block class and data handling functions
 #include "./boat_id.h"
 
-// Determine the blocks that should be selected after the first random selection
-String ai_pick_block(String opponent_ships[]){
-  return "test";
-}
-
 // Determine which direction to go in.
 // LEGEND FOR DIRECTION NOTATION:
 
